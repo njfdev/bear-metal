@@ -7,3 +7,5 @@
 - xorriso
 - mtools
 - nasm
+- i686-elf-gcc
+- curl

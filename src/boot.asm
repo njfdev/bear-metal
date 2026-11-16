@@ -1,61 +1,35 @@
-bits 16
-org 0x7c00
+%define ALIGN 1
+%define MEMINFO 2
+%define FLAGS ALIGN | MEMINFO
+%define MAGIC 0x1badb002 ; magic multiboot flag for GRUB
+%define CHECKSUM -(MAGIC + FLAGS)
 
-boot:
-  cli   ; disable interrupts
+; multiboot header
+section .multiboot
+align 4
+dd MAGIC
+dd FLAGS
+dd CHECKSUM
 
-  ; clear screen
-  mov ah, 0x00  ; set video mode
-  mov al, 0x03  ; standard text mode
-  int 0x10
+; stack of 16 KiB
+section bss
+align 16
+stack_bottom:
+resb 16384
+stack_top:
 
-  ; print boot message "Bear Metal!"
-  mov ah, 0x0e
-  mov al, 'B'
-  int 0x10
+extern kernel_main
 
-  mov ah, 0x0e
-  mov al, 'e'
-  int 0x10
+section .text
+global _start
+_start:
+  ; setup stack
+  mov esp, [stack_top]
 
-  mov ah, 0x0e
-  mov al, 'a'
-  int 0x10
+  ; enter C kernel
+  call kernel_main
 
-  mov ah, 0x0e
-  mov al, 'r'
-  int 0x10
-
-  mov ah, 0x0e
-  mov al, ' '
-  int 0x10
-
-  mov ah, 0x0e
-  mov al, 'M'
-  int 0x10
-
-  mov ah, 0x0e
-  mov al, 'e'
-  int 0x10
-
-  mov ah, 0x0e
-  mov al, 't'
-  int 0x10
-
-  mov ah, 0x0e
-  mov al, 'a'
-  int 0x10
-
-  mov ah, 0x0e
-  mov al, 'l'
-  int 0x10
-
-  mov ah, 0x0e
-  mov al, '!'
-  int 0x10
-
-  halt  ; stop execution
-
-; define magic word at last 2 bytes
-times 510 - ($ - $$) db 0
-dw 0xAA55
+  ; halt infinitely if kernel exits
+  cli
+  hlt
+  jmp $

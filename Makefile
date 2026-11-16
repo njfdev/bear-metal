@@ -1,28 +1,48 @@
-QEMU := qemu-system-x86_64
-QEMU_ARGS := -m 512M
-
 TARGET := bear-metal
 SRC := src
 BUILD := build
+OBJ := $(BUILD)/obj
 
-all: $(BUILD)/$(TARGET).iso
+QEMU := qemu-system-x86_64
+QEMU_ARGS := -m 512M -drive if=pflash,format=raw,readonly=on,file="$(BUILD)/OVMF.fd"
 
-run: all
+SRCS := $(wildcard $(SRC)/*.c)
+OBJS := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SRCS))
+
+CC := i686-elf-gcc
+CFLAGS := -T $(SRC)/linker.ld -ffreestanding -nostdlib -lgcc -O2
+
+GRUB_PREFIX := x86_64-elf-grub
+
+all: $(BUILD) $(BUILD)/$(TARGET).iso
+
+run: all | $(BUILD)/OVMF.fd
 	$(QEMU) $(QEMU_ARGS) -cdrom $(BUILD)/$(TARGET).iso
 
-$(BUILD)/$(TARGET).iso: $(BUILD) $(BUILD)/boot.bin
-	mkdir -p $(BUILD)/iso
+$(BUILD)/OVMF.fd:
+	# OVMF UEFI bios download
+	curl -L -o $(BUILD)/OVMF.fd https://github.com/clearlinux/common/raw/f98964d9b91484006a888db4c3521425a049699b/OVMF.fd
 
-	dd if=/dev/zero of=$(BUILD)/iso/$(TARGET).img bs=1024 count=1440
-	dd if=$(BUILD)/boot.bin of=$(BUILD)/iso/$(TARGET).img conv=notrunc
+$(BUILD)/$(TARGET).iso: $(OBJ)/boot.o $(OBJS)
+	mkdir -p $(BUILD)/iso/boot/grub
 
-	xorriso -as mkisofs -b $(TARGET).img -o $(BUILD)/$(TARGET).iso $(BUILD)/iso
+	$(CC) $(CFLAGS) $^ -o $(BUILD)/iso/boot/$(TARGET)
 
-$(BUILD)/boot.bin: $(SRC)/boot.asm
-	nasm $(SRC)/boot.asm -o $(BUILD)/boot.bin
+	cp $(SRC)/grub.cfg $(BUILD)/iso/boot/grub/grub.cfg
+
+	$(GRUB_PREFIX)-mkrescue -o $(BUILD)/$(TARGET).iso $(BUILD)/iso
+
+$(OBJ)/boot.o: $(SRC)/boot.asm | $(OBJ)
+	nasm -f elf32 $(SRC)/boot.asm -o $(OBJ)/boot.o
+
+$(OBJS): $(SRCS) | $(OBJ)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(OBJ): $(BUILD)
+	mkdir -p $(OBJ)
 
 $(BUILD):
-	mkdir $(BUILD)
+	mkdir -p $(BUILD)
 
 clean:
 	rm -r $(BUILD)
