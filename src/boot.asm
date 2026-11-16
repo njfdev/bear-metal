@@ -1,6 +1,6 @@
-%define ALIGN 1
-%define MEMINFO 2
-%define FLAGS ALIGN | MEMINFO
+%define ALIGN 0b01
+%define MEMINFO 0b10
+%define FLAGS ALIGN + MEMINFO
 %define MAGIC 0x1badb002 ; magic multiboot flag for GRUB
 %define CHECKSUM -(MAGIC + FLAGS)
 
