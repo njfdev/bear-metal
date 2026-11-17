@@ -24,4 +24,7 @@ typedef struct {
 	uint8_t alpha_shift;
 } FrameBuffer;
 
+static uint32_t pack_rgb(Color color, FrameBuffer *fb);
+void put_pixel(FrameBuffer *fb, int x, int y, Color color); 
+
 #endif
