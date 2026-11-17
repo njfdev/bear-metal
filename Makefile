@@ -3,6 +3,13 @@ SRC := src
 BUILD := build
 OBJ := $(BUILD)/obj
 
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+	GRUB_PREFIX := x86_64-elf-grub
+else
+	GRUB_PREFIX := sudo grub
+endif
+
 QEMU := qemu-system-x86_64
 QEMU_ARGS := -m 512M -drive if=pflash,format=raw,readonly=on,file="$(BUILD)/OVMF.fd" -vga virtio
 
@@ -12,9 +19,8 @@ OBJS := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SRCS))
 CC := clang
 CFLAGS := --target=i686-elf -T $(SRC)/linker.ld -ffreestanding -nostdlib -lgcc -O2
 
-GRUB_PREFIX := x86_64-elf-grub
 
-all: $(BUILD) $(BUILD)/$(TARGET).iso
+all: $(BUILD) $(OBJ) $(BUILD)/$(TARGET).iso
 
 run: all | $(BUILD)/OVMF.fd
 	$(QEMU) $(QEMU_ARGS) -cdrom $(BUILD)/$(TARGET).iso
@@ -23,7 +29,7 @@ $(BUILD)/OVMF.fd:
 	# OVMF UEFI bios download
 	curl -L -o $(BUILD)/OVMF.fd https://github.com/clearlinux/common/raw/f98964d9b91484006a888db4c3521425a049699b/OVMF.fd
 
-$(BUILD)/$(TARGET).iso: $(OBJ)/boot.o $(OBJS)
+$(BUILD)/$(TARGET).iso: $(OBJS) $(OBJ)/boot.o
 	mkdir -p $(BUILD)/iso/boot/grub
 
 	$(CC) $(CFLAGS) $^ -o $(BUILD)/iso/boot/$(TARGET)
@@ -32,10 +38,10 @@ $(BUILD)/$(TARGET).iso: $(OBJ)/boot.o $(OBJS)
 
 	$(GRUB_PREFIX)-mkrescue -o $(BUILD)/$(TARGET).iso $(BUILD)/iso
 
-$(OBJ)/boot.o: $(SRC)/boot.asm | $(OBJ)
+$(OBJ)/boot.o: $(SRC)/boot.asm
 	nasm -f elf32 $(SRC)/boot.asm -o $(OBJ)/boot.o
 
-$(OBJS): $(SRCS) | $(OBJ)
+$(OBJ)/%.o: $(SRC)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(OBJ): $(BUILD)
