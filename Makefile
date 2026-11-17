@@ -4,13 +4,13 @@ BUILD := build
 OBJ := $(BUILD)/obj
 
 QEMU := qemu-system-x86_64
-QEMU_ARGS := -m 512M -drive if=pflash,format=raw,readonly=on,file="$(BUILD)/OVMF.fd"
+QEMU_ARGS := -m 512M -drive if=pflash,format=raw,readonly=on,file="$(BUILD)/OVMF.fd" -vga virtio
 
 SRCS := $(wildcard $(SRC)/*.c)
 OBJS := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SRCS))
 
-CC := i686-elf-gcc
-CFLAGS := -T $(SRC)/linker.ld -ffreestanding -nostdlib -lgcc -O2
+CC := clang
+CFLAGS := --target=i686-elf -T $(SRC)/linker.ld -ffreestanding -nostdlib -lgcc -O2
 
 GRUB_PREFIX := x86_64-elf-grub
 
