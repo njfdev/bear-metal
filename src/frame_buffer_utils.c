@@ -16,14 +16,14 @@ static uint32_t pack_color(Color color, FrameBuffer *fb) {
 		alpha << fb->alpha_shift);
 }
 
-void put_pixel(FrameBuffer *fb, int x, int y, Color color) {
+void put_pixel(FrameBuffer *fb, Point point, Color color) {
 	// ignore any pixels that are not on the screen
-	if ((x < 0 || (uint32_t)x >= fb->width) || (y < 0 || (uint32_t)y >= fb->height)) {
+	if ((point.x < 0 || (uint32_t)point.x >= fb->width) || (point.y < 0 || (uint32_t)point.y >= fb->height)) {
 		return;
 	}
 
 	// calculate the offset for this pixel
-	size_t offset = (size_t)y * fb->pitch + (size_t)x * sizeof(uint32_t);
+	size_t offset = point.y * fb->pitch + point.x * sizeof(uint32_t);
 	uint32_t *pixel = (uint32_t*)(fb->buffer + offset);
 	*pixel = pack_color(color, fb);
 }

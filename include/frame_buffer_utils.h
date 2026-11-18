@@ -24,8 +24,36 @@ typedef struct {
 	uint8_t alpha_shift;
 } FrameBuffer;
 
+// simple struct to represent a coordinate
+typedef struct {
+	size_t x;
+	size_t y;
+} Point;
+
+/*
+* A function to take a Color struct and pack it into a uint32_t
+* 
+* @param color - A Color struct representing the color of the pixel
+* @param fb - A pointer to the frame buffer the pixel is being drawn on
+* @return uint32_t - A 32 bit integer representing the color, formatted correctly for the frame buffer
+*/
 static uint32_t pack_rgb(Color color, FrameBuffer *fb);
-void put_pixel(FrameBuffer *fb, int x, int y, Color color); 
+
+/*
+* A function to change the color of a specified pixel in a frame buffer
+*
+* @param fb - A pointer to the the frame buffer the pixel is being drawn on
+* @param point - A Point representing the x and y coordinates of the pixel
+* @param color - A Color representing the color of the pixel
+*/
+void put_pixel(FrameBuffer *fb, Point point, Color color);
+
+/*
+* A function to fill a frame buffer with a specified color
+*
+* @param fb - A pointer to the frame buffer to fill
+* @param color - A Color representing the color to fill the screen with
+*/
 void clear_screen(FrameBuffer *fb, Color color);
 
 #endif
