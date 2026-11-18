@@ -26,5 +26,6 @@ typedef struct {
 
 static uint32_t pack_rgb(Color color, FrameBuffer *fb);
 void put_pixel(FrameBuffer *fb, int x, int y, Color color); 
+void clear_screen(FrameBuffer *fb, Color color);
 
 #endif

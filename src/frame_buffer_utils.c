@@ -1,10 +1,12 @@
+#include <stddef.h>
+#include <stdint.h>
 #include "frame_buffer_utils.h"
 
 static uint32_t pack_color(Color color, FrameBuffer *fb) {
 	// cast everything to 32 bit ints
 	uint32_t red = (uint32_t)color.r;
-	uint32_t blue = (uint32_t)color.g;
-	uint32_t green = (uint32_t)color.b;
+	uint32_t green = (uint32_t)color.g;
+	uint32_t blue = (uint32_t)color.b;
 	uint32_t alpha = (uint32_t)color.a;
 	
 	// shift each byte to its respective in the final 32 bit color
@@ -24,4 +26,17 @@ void put_pixel(FrameBuffer *fb, int x, int y, Color color) {
 	size_t offset = (size_t)y * fb->pitch + (size_t)x * sizeof(uint32_t);
 	uint32_t *pixel = (uint32_t*)(fb->buffer + offset);
 	*pixel = pack_color(color, fb);
-} 
+}
+
+void clear_screen(FrameBuffer *fb, Color color) {
+	uint32_t packed_color = pack_color(color, fb);
+
+	// we don't need to call pack_color for every pixel since they're all the same
+	for (uint32_t y = 0; y < fb->height; y++) {
+		uint32_t *row_loc = (uint32_t*)fb->buffer + ((size_t)y * fb->pitch);
+		for (uint32_t x = 0; x < fb->width; x++) {
+			row_loc[x] = packed_color;
+		}
+	}
+}
+ 
