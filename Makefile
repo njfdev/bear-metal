@@ -6,12 +6,14 @@ OBJ := $(BUILD)/obj
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
 	GRUB_PREFIX := x86_64-elf-grub
+	QEMU_OS_SPECIFIC_ARGS := -display cocoa,zoom-to-fit=on
 else
 	GRUB_PREFIX := sudo grub
+	QEMU_OS_SPECIFIC_ARGS := -display gtk,zoom-to-fit=on
 endif
 
 QEMU := qemu-system-x86_64
-QEMU_ARGS := -m 512M -drive if=pflash,format=raw,readonly=on,file="$(BUILD)/OVMF.fd" -vga virtio
+QEMU_ARGS := -m 512M -drive if=pflash,format=raw,readonly=on,file="$(BUILD)/OVMF.fd" -vga virtio -monitor stdio $(QEMU_OS_SPECIFIC_ARGS)
 
 SRCS := $(wildcard $(SRC)/*.c)
 OBJS := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SRCS))

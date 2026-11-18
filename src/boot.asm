@@ -1,6 +1,7 @@
-%define ALIGN 0b01
-%define MEMINFO 0b10
-%define FLAGS ALIGN + MEMINFO
+%define ALIGN 1
+%define MEMINFO 2
+%define VIDEO_MODE 4
+%define FLAGS ALIGN + MEMINFO + VIDEO_MODE
 %define MAGIC 0x1badb002 ; magic multiboot flag for GRUB
 %define CHECKSUM -(MAGIC + FLAGS)
 
@@ -10,6 +11,11 @@ align 4
 dd MAGIC
 dd FLAGS
 dd CHECKSUM
+resb 5*4; skip to byte 32 of multiboot header for video setup
+dd 0 ; linear graphics mode
+dd 640 ; width in px
+dd 480 ; height in px
+dd 32 ; bit depth of each pixel
 
 ; stack of 16 KiB
 section bss
@@ -25,6 +31,10 @@ global _start
 _start:
   ; setup stack
   mov esp, [stack_top]
+
+  ; push multiboot info struct and magic onto stack for kernel_main
+  push ebx
+  push eax
 
   ; enter C kernel
   call kernel_main
