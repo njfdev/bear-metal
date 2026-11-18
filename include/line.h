@@ -1,4 +1,4 @@
-ifndef _LINE_H_
+#ifndef _LINE_H_
 #define _LINE_H_
 
 #include "frame_buffer_utils.h"
