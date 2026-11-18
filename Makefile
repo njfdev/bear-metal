@@ -17,7 +17,7 @@ SRCS := $(wildcard $(SRC)/*.c)
 OBJS := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SRCS))
 
 CC := clang
-CFLAGS := --target=i686-elf -T $(SRC)/linker.ld -ffreestanding -nostdlib -lgcc -O2
+CFLAGS := --target=i686-elf -T $(SRC)/linker.ld -ffreestanding -nostdlib -lgcc -O2 -Iinclude
 
 
 all: $(BUILD) $(OBJ) $(BUILD)/$(TARGET).iso
