@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "frame_buffer_utils.h"
+#include "bitmap.h"
 
 static uint32_t pack_color(Color color, FrameBuffer *fb) {
 	// cast everything to 32 bit ints
