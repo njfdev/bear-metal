@@ -39,7 +39,7 @@ typedef struct {
 * @param fb - A pointer to the frame buffer the pixel is being drawn on
 * @return uint32_t - A 32 bit integer representing the color, formatted correctly for the frame buffer
 */
-static uint32_t pack_rgb(Color color, FrameBuffer *fb);
+uint32_t pack_rgb(Color color, FrameBuffer *fb);
 
 /*
 * A function to change the color of a specified pixel in a frame buffer
@@ -66,16 +66,5 @@ void put_pixel_pre_packed(FrameBuffer *fb, Point point, uint32_t color);
 * @param color - A Color representing the color to fill the screen with
 */
 void clear_screen(FrameBuffer *fb, Color color);
-
-/*
-* A function to draw a bitmap with the upper left corner at the specified point
-*
-* @param fb - A pointer to the frame buffer the bitmap is being drawn on
-* @param bitmap - A pointer to the bitmap to be drawn
-* @param loc - A Point representing where the upper left corner of the bitmap will be drawn
-* @param color - A Color representing the color of the bitmap
-* @param scale - The scale of the bitmap
-*/
-void draw_bitmap(FrameBuffer *fb, Bitmap *bitmap, Point loc, Color color, uint8_t scale);
 
 #endif
