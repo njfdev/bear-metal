@@ -1,7 +1,8 @@
 #ifndef _WRITE_FRAME_BUFFER_H_
 #define _WRITE_FRAME_BUFFER_H_
 
-#include "bitmap.h"
+#include <stdint.h>
+#include <stddef.h>
 
 typedef struct {
 	uint8_t r;
@@ -39,7 +40,7 @@ typedef struct {
 * @param fb - A pointer to the frame buffer the pixel is being drawn on
 * @return uint32_t - A 32 bit integer representing the color, formatted correctly for the frame buffer
 */
-uint32_t pack_rgb(Color color, FrameBuffer *fb);
+uint32_t pack_color(Color color, FrameBuffer *fb);
 
 /*
 * A function to change the color of a specified pixel in a frame buffer

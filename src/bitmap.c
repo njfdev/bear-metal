@@ -1,6 +1,5 @@
 #include <stddef.h>
 #include <stdint.h>
-#include "frame_buffer_utils.h"
 #include "bitmap.h"
 
 void draw_bitmap(FrameBuffer *fb, Bitmap *bitmap, Point loc, Color color, uint8_t scale) {
