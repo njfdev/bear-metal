@@ -44,7 +44,7 @@ typedef struct {
     uint16_t vbe_interface_len;
 
     // Framebuffer fields (valid if flags bit 12 is set)
-    uint64_t framebuffer_addr;
+    uint32_t framebuffer_addr;
     uint32_t framebuffer_pitch;
     uint32_t framebuffer_width;
     uint32_t framebuffer_height;
@@ -55,7 +55,7 @@ typedef struct {
 
 void kernel_main(unsigned long magic, multiboot_info_t *info) {
 	FrameBuffer fb = {
-		.buffer = (uint64_t*)0x80000000,
+		.buffer = (uint32_t*)0x80000000,
 		.width = 640,
 		.height = 480,
 		.pitch = 640,
@@ -86,4 +86,6 @@ void kernel_main(unsigned long magic, multiboot_info_t *info) {
 			put_pixel(&fb, (Point){x, y}, blue);	
 		}
 	}
+	
+	draw_text(&fb, "Hello World", (Point){200, 200}, white, 1);
 }

@@ -13,7 +13,7 @@ typedef struct {
 
 typedef struct {
 	// address 
-	uint64_t *buffer;
+	uint32_t *buffer;
 	
 	// size of screen
 	uint32_t width;
