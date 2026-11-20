@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include "frame_buffer_utils.h"
 #include "font.h"
+#include "line.h"
 
 struct multiboot_aout_symbol_table
 {
@@ -74,18 +75,8 @@ void kernel_main(unsigned long magic, multiboot_info_t *info) {
 
 	// set the background to be gray
 	clear_screen(&fb, background);
-
-	for (size_t x = 100; x < fb.width - 100; x++) {
-		for (size_t y = 40; y < 80; y++) {
-			put_pixel(&fb, (Point){x, y}, red);
-		}
-		for (size_t y = 80; y < 120; y++) {
-			put_pixel(&fb, (Point){x, y}, green);
-		}
-		for (size_t y = 120; y < 160; y++) {
-			put_pixel(&fb, (Point){x, y}, blue);	
-		}
-	}
-	
-	draw_text(&fb, "Hello World", (Point){200, 200}, white, 1);
+	// draw some example text
+	draw_text(&fb, "Hello World", (Point){20, 20}, white, 1);
+	// draw a line
+	draw_line(&fb, (Point){30, 260}, (Point){100, 220}, white, 1, 1); 
 }
