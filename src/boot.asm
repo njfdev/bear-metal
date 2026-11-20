@@ -18,7 +18,7 @@ dd 480 ; height in px
 dd 32 ; bit depth of each pixel
 
 ; stack of 16 KiB
-section bss
+section .bss
 align 16
 stack_bottom:
 resb 16384
@@ -30,7 +30,7 @@ section .text
 global _start
 _start:
   ; setup stack
-  mov esp, [stack_top]
+  mov esp, stack_top
 
   ; push multiboot info struct and magic onto stack for kernel_main
   push ebx
