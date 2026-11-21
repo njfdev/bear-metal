@@ -61,3 +61,39 @@ int min_int(int a, int b) {
 int max_int(int a, int b) {
 	return (a > b) ? a : b;
 }
+
+void uint_to_string(unsigned int val, char *buf, unsigned int buf_len) {
+	if (buf_len == 0) return;
+	if (buf_len == 1) {
+		buf[0] = 0;
+		return;
+	}
+
+	if (val == 0) {
+		buf[0] = '0';
+		buf[1] = 0;
+		return;
+	}
+
+	unsigned int cur = val;
+	int i = 0;
+
+	while (cur > 0 && i < buf_len-1) {
+		cur /= 10;
+		i++;
+	}
+
+	buf[i] = 0;
+	i--;
+
+	cur = val;
+
+	while (cur > 0 && i >= 0) {
+		char cur_digit = (cur%10)+48;
+		buf[i] = cur_digit;
+
+		cur /= 10;
+
+		i--;
+	}
+}

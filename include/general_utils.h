@@ -67,4 +67,13 @@ int min_int(int a, int b);
 */
 int max_int(int a, int b);
 
+/*
+ * Converts an unsigned integer to a char* from a buffer.
+ * 
+ * @param val Integer to convert
+ * @param buf Buffer to write string to
+ * @param buf_len Maximum length of buffer (including null byte)
+*/
+void uint_to_string(unsigned int val, char *buf, unsigned int buf_len);
+
 #endif

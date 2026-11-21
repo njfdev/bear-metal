@@ -16,14 +16,14 @@ QEMU := qemu-system-x86_64
 QEMU_ARGS := -m 512M -drive if=pflash,format=raw,readonly=on,file="$(BUILD)/OVMF.fd" -vga virtio -monitor stdio $(QEMU_OS_SPECIFIC_ARGS)
 QEMU_ARGS += -d int,cpu_reset,guest_errors -D $(BUILD)/qemu.log
 
-SRCS := $(wildcard $(SRC)/*.c)
+SRCS := $(shell find $(SRC) -name '*.c')
 OBJS := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SRCS))
 
 CC := clang
 CFLAGS := --target=i686-elf -T $(SRC)/linker.ld -ffreestanding -nostdlib -lgcc -O2 -Iinclude
 
 
-all: $(BUILD) $(OBJ) $(BUILD)/$(TARGET).iso
+all: $(BUILD)/$(TARGET).iso | $(BUILD) $(OBJ)
 
 run: all | $(BUILD)/OVMF.fd
 	$(QEMU) $(QEMU_ARGS) -cdrom $(BUILD)/$(TARGET).iso
@@ -32,10 +32,10 @@ $(BUILD)/OVMF.fd:
 	# OVMF UEFI bios download
 	curl -L -o $(BUILD)/OVMF.fd https://github.com/clearlinux/common/raw/f98964d9b91484006a888db4c3521425a049699b/OVMF.fd
 
-$(BUILD)/$(TARGET).iso: $(OBJS) $(OBJ)/boot.o
+$(BUILD)/$(TARGET).iso: $(OBJS) $(OBJ)/boot.o $(SRC)/grub.cfg
 	mkdir -p $(BUILD)/iso/boot/grub
 
-	$(CC) $(CFLAGS) $^ -o $(BUILD)/iso/boot/$(TARGET)
+	$(CC) $(CFLAGS) $(filter-out %.cfg, $^) -o $(BUILD)/iso/boot/$(TARGET)
 
 	cp $(SRC)/grub.cfg $(BUILD)/iso/boot/grub/grub.cfg
 
@@ -45,6 +45,7 @@ $(OBJ)/boot.o: $(SRC)/boot.asm
 	nasm -f elf32 $(SRC)/boot.asm -o $(OBJ)/boot.o
 
 $(OBJ)/%.o: $(SRC)/%.c
+	mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(OBJ): $(BUILD)
