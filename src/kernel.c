@@ -2,6 +2,7 @@
 #include "frame_buffer_utils.h"
 #include "font.h"
 #include "line.h"
+#include "quad.h"
 
 struct multiboot_aout_symbol_table
 {
@@ -78,5 +79,8 @@ void kernel_main(unsigned long magic, multiboot_info_t *info) {
 	// draw some example text
 	draw_text(&fb, "Hello World", (Point){20, 20}, white, 1);
 	// draw a line
-	draw_line(&fb, (Point){30, 260}, (Point){100, 220}, white, 1, 1); 
+	draw_line(&fb, (Point){30, 260}, (Point){100, 220}, white, 0, 5); 
+	// draw a quad
+	Point corners[4] = {(Point){50, 50}, (Point){110, 50}, (Point){120, 140}, (Point){40, 130}};
+	fill_quad(&fb, corners, red);
 }
