@@ -25,4 +25,46 @@ float abs(float a);
 */
 float decimal_part(float a);
 
+/*
+* A function to find the inverse square root of a number
+*
+* @param a - The number to get the inverse square root of
+* @return float - The inverse square root of a
+*/
+float inverse_sqrt(float a);
+
+/*
+* A function to get the sign of a number
+*
+* @param a - The number to get the sign of
+* @return int - The sign (1 for pos, -1 for neg, 0 for 0)
+*/
+int sgn(int a);
+
+/*
+* A function to round a number
+*
+* @param a - The number to round
+* @return int - The rounded number
+*/
+int round(float a);
+
+/*
+* A function to get the min of two ints
+*
+* @param a - int 1
+* @param b - int 2
+* @return int - the minimum
+*/
+int min_int(int a, int b);
+
+/*
+* A function to get the max of two ints
+*
+* @param a - int 1
+* @param b - int 2
+* @return int - the maximum
+*/
+int max_int(int a, int b);
+
 #endif
