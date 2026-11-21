@@ -26,7 +26,7 @@ float inverse_sqrt(float a) {
 	float three_halfs = 1.5f;
 
 	x2 = a * 0.5f;
-	y = number;
+	y = a;
 	i = *(long*)&y; // move the bits of the float into a long so we can bit manipulate it
 	
 	// now we can use the fact that for a float reading it as an int is approx the log of the float which turns inverse square root (^-1/2) into multiplication
