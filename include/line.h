@@ -14,6 +14,16 @@
 static void draw_line_no_thickness(FrameBuffer *fb, Point start, Point end, Color color);
 
 /*
+* A function to find the four corners of a quadrilateral representing a line with thickness > 1
+*
+* @param start - The start Point of the line
+* @param end - The end Point of the line
+* @param thickness - The thickness of the line (in px)
+* @return void - Modifies the list in place to create the 4 Points
+*/
+static void find_quad_corners(Point start, Point end, int thickness, Point corners[4]);
+
+/*
 * A function to draw a line on the provided frame buffer
 *
 * @param fb - A pointer to the frame buffer to draw on
