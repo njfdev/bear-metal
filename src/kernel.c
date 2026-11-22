@@ -6,6 +6,7 @@
 #include "line.h"
 #include "quad.h"
 #include "timer.h"
+#include "colors.h"
 
 void kernel_main(unsigned long magic, multiboot_info_t *info) {
 	// TODO: pull correct video dimensions from multiboot info
@@ -21,21 +22,16 @@ void kernel_main(unsigned long magic, multiboot_info_t *info) {
 	};
 
 	Color background = {20, 20, 20, 0};
-	Color white = {255, 255, 255, 0};	
-	Color black = {0, 0, 0, 0};
-	Color red = {255, 0, 0, 0};
-	Color green = {0, 255, 0, 0};
-	Color blue = {0, 0, 255, 0};
 
 	// set the background to be gray
 	clear_screen(&fb, background);
 	// draw some example text
-	draw_text(&fb, "Hello World", (Point){20, 20}, white, 1);
+	draw_text(&fb, "Hello World", (Point){20, 20}, WHITE, 1);
 	// draw a line
-	draw_line(&fb, (Point){200, 260}, (Point){300, 220}, white, 0, 5); 
+	draw_line(&fb, (Point){200, 260}, (Point){300, 220}, OCRE, 0, 5); 
 	// draw a quad
 	Point corners[4] = {(Point){50, 50}, (Point){110, 50}, (Point){120, 140}, (Point){40, 130}};
-	fill_quad(&fb, corners, red);
+	fill_quad(&fb, corners, RED, 0);
 
 	int count = 0;
 
@@ -51,7 +47,7 @@ void kernel_main(unsigned long magic, multiboot_info_t *info) {
 			clear_screen(&fb, background);
 		}
 
-		draw_text(&fb, int_str, (Point){20, 40 + 20*i}, white, 1);
+		draw_text(&fb, int_str, (Point){20, 40 + 20*i}, WHITE, 1);
 		
 		timer_sleep(1000);
 		count += 1;
