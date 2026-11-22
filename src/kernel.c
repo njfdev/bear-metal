@@ -7,6 +7,7 @@
 #include "quad.h"
 #include "timer.h"
 #include "colors.h"
+#include "circle.h"
 
 void kernel_main(unsigned long magic, multiboot_info_t *info) {
 	// TODO: pull correct video dimensions from multiboot info
@@ -32,7 +33,9 @@ void kernel_main(unsigned long magic, multiboot_info_t *info) {
 	// draw a quad
 	Point corners[4] = {(Point){50, 50}, (Point){110, 50}, (Point){120, 140}, (Point){40, 130}};
 	fill_quad(&fb, corners, RED, 0);
-
+	// draw a circle
+	draw_circle(&fb, (Point){250, 250}, 50, BURPLE, 5, 0);
+	
 	int count = 0;
 
 	int i = 0;

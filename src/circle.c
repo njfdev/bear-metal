@@ -16,7 +16,7 @@ static void plot_octants(FrameBuffer *fb, Point center, Point mirror_point, uint
 }
 
 void draw_circle(FrameBuffer *fb, Point center, int radius, Color color, int thickness, int fill) {
-	// TODO: Implement thickness and fill
+	// TODO: Implement fill
 	// midpoint circle algorithm with two passes and then a scanline fill if needed
 	uint32_t packed_color = pack_color(color, fb);
 	int x = 0;
@@ -34,5 +34,48 @@ void draw_circle(FrameBuffer *fb, Point center, int radius, Color color, int thi
 			err += 2 * (x - y) + 1;
 		}
 		plot_octants(fb, center, (Point){x, y}, packed_color);
+	}
+	
+	if (thickness > 1) {
+		// then just plot another circle with radius + thickness and fill
+		// it would be great if we could just recursively call, but sadly we have to do both circles at the same time so we can fill them in
+		int x1 = 0;
+		int y1 = radius;
+		int x2 = 0;
+		int y2 = radius + thickness;
+		int err1 = 1 - radius;
+		int err2 = 1 - (radius + thickness);
+		for (int y = y1; y <= y2; y++) {
+			plot_octants(fb, center, (Point){0, y}, packed_color);
+		}
+
+		while (x2 < y2) {
+			x2++;
+			if (x1 < y1) {
+				x1++;
+				if (err1 < 0) {
+					err1 += 2 * x1 + 1;
+				} else {
+					y1--;
+					err1 += 2 * (x1 - y1) + 1;
+				}
+			}
+			
+			if (err2 < 0) {
+				err2 += 2 * x2 + 1;
+			} else {
+				y2--;
+				err2 += 2 * (x2 - y2) + 1;
+			}
+			
+			// now we need to fill it in
+			int start_y = x2;
+			if (x1 == x2 && y1 >= x2) {
+				start_y = y1;
+			}
+			for (int y = start_y; y <= y2; y++) {
+				plot_octants(fb, center, (Point){x2, y}, packed_color);
+			}
+		}
 	}
 }
