@@ -2,7 +2,7 @@
 #include <stddef.h>
 #include "quad.h"
 
-void fill_quad(FrameBuffer *fb, Point corners[4], Color color) {	
+void fill_quad(FrameBuffer *fb, Point corners[4], Color color, int antialiasing) {	
 	uint32_t packed_color = pack_color(color, fb);
 
 	ScanEdge edges[4];
@@ -40,9 +40,9 @@ void fill_quad(FrameBuffer *fb, Point corners[4], Color color) {
 	}
 
 	for (int y = top_y; y < bottom_y; y++) {	
+		// loop through each y value in the quadrilateral
 		float left = 100000.0f; // arbitrarily large
 		float right = 0.0f;
-		// loop through each y value in the quadrilateral
 		for (int i = 0; i < edge_count; i++) { 
 			ScanEdge *edge = &edges[i];
 			if (y < edge->top.y || y >= edge->bottom_y) {
@@ -50,7 +50,7 @@ void fill_quad(FrameBuffer *fb, Point corners[4], Color color) {
 			}
 
 			float x = edge->top.x + (y - edge->top.y) * edge->islope;
-			if ( x < left) {
+			if (x < left) {
 				left = x;
 			}
 			if (x > right) {
@@ -59,7 +59,19 @@ void fill_quad(FrameBuffer *fb, Point corners[4], Color color) {
 		}
 
 		for (int x = left; x < right; x++) {
-			put_pixel_pre_packed(fb, (Point){x, y}, packed_color);
+			// we need to antialias only on the edges - we do this by finding distance from the true float value
+			if (antialiasing && x == (int)left) {
+				// x <= left so we just change opacity of this pixel
+				int alpha = (int)(color.a * (1 - (left - x)));
+				put_pixel(fb, (Point){x, y}, (Color){color.r, color.g, color.b, alpha});
+			} else if (antialiasing && x >= (right - 1)) {
+				// we need to color this pixel and possibly the pixel after it
+				put_pixel_pre_packed(fb, (Point){x, y}, packed_color);
+				int alpha = (int)(color.a * (right - x));
+				put_pixel(fb, (Point){x + 1, y}, (Color){color.r, color.g, color.b, alpha});
+			} else {
+				put_pixel_pre_packed(fb, (Point){x, y}, packed_color);
+			}
 		}
 	}
 }

@@ -17,6 +17,6 @@ typedef struct {
 * @param corners - A list of 4 Points representing the corners of the quadrilateral
 * @param color - The Color of the quadrilateral
 */
-void fill_quad(FrameBuffer *fb, Point corners[4], Color color);
+void fill_quad(FrameBuffer *fb, Point corners[4], Color color, int antialiasing);
 
 #endif
