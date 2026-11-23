@@ -43,3 +43,9 @@ _start:
   cli
   hlt
   jmp $
+
+global interrupt_handler_entry
+extern interrupt_handler
+interrupt_handler_entry:
+  call interrupt_handler
+  iret

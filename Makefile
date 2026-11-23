@@ -13,7 +13,7 @@ else
 endif
 
 QEMU := qemu-system-x86_64
-QEMU_ARGS := -m 512M -drive if=pflash,format=raw,readonly=on,file="$(BUILD)/OVMF.fd" -vga virtio -monitor stdio $(QEMU_OS_SPECIFIC_ARGS)
+QEMU_ARGS := -m 512M -drive if=pflash,format=raw,readonly=on,file="$(BUILD)/OVMF.fd" -vga virtio -monitor stdio $(QEMU_OS_SPECIFIC_ARGS) -d int,cpu_reset -no-reboot -no-shutdown -D qemu.log
 QEMU_ARGS += -d int,cpu_reset,guest_errors -D $(BUILD)/qemu.log
 
 SRCS := $(shell find $(SRC) -name '*.c')
