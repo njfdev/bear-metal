@@ -16,16 +16,22 @@ static void plot_octants(FrameBuffer *fb, Point center, Point mirror_point, uint
 }
 
 void draw_circle(FrameBuffer *fb, Point center, int radius, Color color, int thickness, int fill) {
-	// TODO: Implement fill
 	// midpoint circle algorithm with two passes and then a scanline fill if needed
 	uint32_t packed_color = pack_color(color, fb);
 	int x = 0;
-	int y = radius;
-	int err = 1 - radius;
-	
-	plot_octants(fb, center, (Point){x, y}, packed_color);
+	// if we are filling and we have a thickness we don't need to draw inner circle
+	int y = (thickness > 1 && fill) ? (radius + thickness) : radius;
+	int err = 1 - y;
 
-	while (x < y) {
+	while (x <= y) {
+		if (fill) {
+			for (int y_temp = x; y_temp <= y; y_temp++) {
+				plot_octants(fb, center, (Point){x, y_temp}, packed_color);
+			}
+		} else {
+			plot_octants(fb, center, (Point){x, y}, packed_color);
+		}
+
 		x++;
 		if (err < 0) {
 			err += 2 * x + 1;
@@ -33,9 +39,12 @@ void draw_circle(FrameBuffer *fb, Point center, int radius, Color color, int thi
 			y--;
 			err += 2 * (x - y) + 1;
 		}
-		plot_octants(fb, center, (Point){x, y}, packed_color);
 	}
 	
+	if (thickness > 1 && fill) {
+		return;
+	}
+
 	if (thickness > 1) {
 		// then just plot another circle with radius + thickness and fill
 		// it would be great if we could just recursively call, but sadly we have to do both circles at the same time so we can fill them in
