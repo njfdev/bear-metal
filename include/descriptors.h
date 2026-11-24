@@ -8,7 +8,8 @@
 __attribute__((naked)) void name##_entry() { \
   __asm__ volatile ("call " #name); \
   __asm__ volatile ("iret"); \
-}
+} \
+__attribute__((no_caller_saved_registers)) // this prevents the following C handler from corrupting existing state
 
 typedef struct {
 	uint16_t limit;
