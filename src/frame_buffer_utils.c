@@ -40,15 +40,18 @@ void put_pixel_pre_packed(FrameBuffer *fb, Point point, uint32_t color) {
 	*pixel = color; // this is just a small optimization so that we don't have to always repeatedly pack the same color
 }
 
-// TODO: figure out why this doesn't work with higher clang optimization levels
 void clear_screen(FrameBuffer *fb, Color color) {
 	uint32_t packed_color = pack_color(color, fb);
 
+	uint32_t height = fb->height;
+	uint32_t width = fb->width;
+
 	// we don't need to call pack_color for every pixel since they're all the same
-	for (uint32_t y = 0; y < fb->height; y++) {
+	for (uint32_t y = 0; y < height; y++) {
 		volatile uint32_t *row_loc = (volatile uint32_t*)fb->buffer + ((size_t)y * fb->pitch);
-		for (uint32_t x = 0; x < fb->width; x++) {
+		for (uint32_t x = 0; x < width; x++) {
 			row_loc[x] = packed_color;
 		}
 	}
+
 }
