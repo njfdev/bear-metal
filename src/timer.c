@@ -15,7 +15,6 @@ void timer_int() {
 	outb(0x20, 0x20);
 }
 
-// TODO: set this up with interrupts
 void timer_init(idt_t *idt) {
   // setup interrupt 0x20
   set_idt(idt+0x20, timer_int_entry);
@@ -32,9 +31,6 @@ void timer_init(idt_t *idt) {
 	outb(0x06, 0x43);
 	outb(pit_divisor&0xff, 0x40);
 	outb(pit_divisor>>8, 0x40);
-
-  // unmask all IRQs interrupt of PIC
-  outb(0xfe, 0x21);
 
   sti();
 }

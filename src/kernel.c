@@ -1,6 +1,7 @@
 #include "asm.h"
 #include "descriptors.h"
 #include "general_utils.h"
+#include "keyboard.h"
 #include "multiboot.h"
 #include "frame_buffer_utils.h"
 #include "font.h"
@@ -19,6 +20,10 @@ static idt_t idt[256];
 void kernel_main(unsigned long magic, multiboot_info_t *info) {
 	init_descriptors(gdt, idt);
 	timer_init(idt);
+	keyboard_init(idt);
+
+  // unmask all IRQ 0 and 1 of PIC
+  outb(0b11111100, 0x21);
 
 	// TODO: pull correct video dimensions from multiboot info
 	fb = (FrameBuffer) {
@@ -50,8 +55,8 @@ void kernel_main(unsigned long magic, multiboot_info_t *info) {
 
 	int i = 0;
 	while (1) {
-		char int_str[20] = "Seconds: ";
-		uint_to_string(count, int_str+9, 11);
+		char int_str[20] = "Enter? ";
+		uint_to_string(check_pressed(Enter), int_str+7, 11);
 
 		i++;
 

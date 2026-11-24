@@ -40,6 +40,7 @@ void put_pixel_pre_packed(FrameBuffer *fb, Point point, uint32_t color) {
 	*pixel = color; // this is just a small optimization so that we don't have to always repeatedly pack the same color
 }
 
+// TODO: figure out why this doesn't work with higher clang optimization levels
 void clear_screen(FrameBuffer *fb, Color color) {
 	uint32_t packed_color = pack_color(color, fb);
 
