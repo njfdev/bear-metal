@@ -1,5 +1,6 @@
 #include "asm.h"
 #include "descriptors.h"
+#include "gameloop.h"
 #include "general_utils.h"
 #include "keyboard.h"
 #include "multiboot.h"
@@ -11,7 +12,7 @@
 #include "colors.h"
 #include "circle.h"
 
-FrameBuffer fb;
+FrameBuffer fb = {};
 
 static gdt_t gdt[256];
 static idt_t idt[256];
@@ -36,6 +37,8 @@ void kernel_main(unsigned long magic, multiboot_info_t *info) {
 		.blue_shift = 0,
 		.alpha_shift = 24
 	};
+
+	gameloop(&fb);
 
 	Color background = {20, 20, 20, 0};
 
