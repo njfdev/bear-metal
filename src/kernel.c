@@ -10,21 +10,15 @@
 #include "colors.h"
 #include "circle.h"
 
-
 FrameBuffer fb;
-
-INTERRUPT_ENTRY(timer_int)
-void timer_int() {
-	draw_text(&fb, "Named Interrupt!!", (Point){200, 20}, WHITE, 1);
-}
 
 static gdt_t gdt[256];
 static idt_t idt[256];
 
 
 void kernel_main(unsigned long magic, multiboot_info_t *info) {
-	set_idt(idt+0x80, timer_int_entry);
 	init_descriptors(gdt, idt);
+	timer_init(idt);
 
 	// TODO: pull correct video dimensions from multiboot info
 	fb = (FrameBuffer) {
@@ -51,9 +45,6 @@ void kernel_main(unsigned long magic, multiboot_info_t *info) {
 	fill_quad(&fb, corners, RED, 0);
 	// draw a circle
 	draw_circle(&fb, (Point){250, 250}, 50, BURPLE, 5, 0);
-
-
-	__asm__ volatile("int $0x80");
 
 	int count = 0;
 

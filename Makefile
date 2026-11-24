@@ -20,7 +20,7 @@ SRCS := $(shell find $(SRC) -name '*.c')
 OBJS := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SRCS))
 
 CC := clang
-CFLAGS := --target=i686-elf -T $(SRC)/linker.ld -ffreestanding -nostdlib -lgcc -O2 -Iinclude
+CFLAGS := --target=i686-elf -T $(SRC)/linker.ld -ffreestanding -nostdlib -lgcc -O1 -Iinclude
 
 
 all: $(BUILD)/$(TARGET).iso | $(BUILD) $(OBJ)
