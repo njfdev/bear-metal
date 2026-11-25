@@ -24,6 +24,16 @@ static void draw_line_no_thickness(FrameBuffer *fb, Point start, Point end, Colo
 static void find_quad_corners(Point start, Point end, int thickness, Point corners[4]);
 
 /*
+* A helper function to draw a 1 thickness antialiased line
+*
+* @param fb - A pointer to the frame buffer
+* @param start - The start Point of the line
+* @param end - The end Point of the line
+* @param color - The Color of the line
+*/
+static void draw_line_xiaolin(FrameBuffer *fb, Point start, Point end, Color color);
+
+/*
 * A function to draw a line on the provided frame buffer
 *
 * @param fb - A pointer to the frame buffer to draw on

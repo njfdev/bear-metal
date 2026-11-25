@@ -86,6 +86,66 @@ static void find_quad_corners(Point start, Point end, int thickness, Point corne
 	corners[3] = (Point){x3, y3};
 }
 
+static void draw_line_xiaolin(FrameBuffer *fb, Point start, Point end, Color color) {
+	// TODO: Implement an alpha channel
+	int x0 = start.x;
+	int y0 = start.y;
+	int x1 = end.x;
+	int y1 = end.y;
+	int steep = abs(y1 - y0) > abs(x1 - x0);
+
+	if (steep) {
+		// swap so we can step along x-axis still
+		int temp = x0;
+		x0 = y0;
+		y0 = temp;
+
+		temp = x1;
+		x1 = y1;
+		y1 = temp;
+	}
+	if (x0 > x1) {
+		// draw from left to right
+		int temp = x0;
+		x0 = x1;
+		x1 = temp;
+		
+		temp = y0;
+		y0 = y1;
+		y1 = temp;
+	}
+	int dx = x1 - x0;
+	float slope = dx ? (float)(y1 - y0) / dx : 0.0f;
+	for (int x = x0; x < x1; x++) {
+		float exact_y;
+		if (x == x1) {
+			exact_y = y1;
+		} else {
+			exact_y = y0 + (x - x0) * slope;
+		}
+		int y = (int)exact_y;
+		if (exact_y < y) {
+			y--;
+		}
+		float fraction = exact_y - y;
+
+		// find the opacities
+		Color first = color;
+		Color second = color;
+		second.a = (uint8_t)(color.a * fraction + 0.5f); // round
+		first.a = color.a - second.a; // opacities will sum to original
+		
+		if (first.a > 0) {
+			Point pixel = steep ? (Point){y, x} : (Point){x, y}; // swap back if needed
+			put_pixel(fb, pixel, first);
+		}
+		if (second.a > 0) {
+			Point pixel = steep ? (Point){y, x} : (Point){x, y};
+			put_pixel(fb, pixel, second);	
+		}
+	}
+}
+
 void draw_line(FrameBuffer *fb, Point start, Point end, Color color, int antialiasing, int thickness) {
 	if (antialiasing) {
 		// we are using xiaolin
@@ -94,31 +154,7 @@ void draw_line(FrameBuffer *fb, Point start, Point end, Color color, int antiali
 			find_quad_corners(start, end, thickness, corners);
 			fill_quad(fb, corners, color, 1);
 		} else {
-			int alpha = color.a;
-			int dy = end.y - start.y;
-			int dx = end.x - start.x;
-			float m;
-			// calculate the slope avoiding dividing by 0
-			if (!dx) {
-				m = 1;
-			} else {
-				m = (float)dy / dx;
-			}	
-			for (int i = 0; i < dx + 1; i++) {
-				// loop through each x value 
-				int x = start.x + i;
-				float y = start.y + m * i;
-				
-				// now we need to find the opacity of the pixel above and below the line (int)y and (int)y+1
-				// opacity of (int)y+1 is distance between line and (int)y and vice versa
-				float distance = decimal_part(y);
-				float top_opacity = 1 - distance;
-
-				Color top_pixel = {color.r, color.g, color.b, color.a * top_opacity};
-				Color bottom_pixel = {color.r, color.g, color.b, color.a * distance};
-				put_pixel(fb, (Point){x, (int)y}, top_pixel);
-				put_pixel(fb, (Point){x, (int)y + 1}, bottom_pixel);
-			}
+			draw_line_xiaolin(fb, start, end, color);
 		}
 	} else {
 		// in this case we want to use bresenham's
