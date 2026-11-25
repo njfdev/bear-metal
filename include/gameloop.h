@@ -67,6 +67,7 @@ void endscreen_tick(gamestate_t *state);
 */
 void reset_game_state(gamestate_t *state);
 
+void render_game(gamestate_t *state);
 void add_obstacle(gamestate_t *state, obstacle_state_t obs_state);
 void remove_obstacle(gamestate_t *state, uint32_t index);
 uint8_t check_collisions(gamestate_t *state);

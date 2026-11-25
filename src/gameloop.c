@@ -54,9 +54,9 @@ void gameloop(FrameBuffer *fb) {
 
     if (check_pressed(Enter) && state.phase != Title) {
       state.phase = Title;
+      reset_game_state(&state);
     } else if (check_pressed(Up) && state.phase == Title) {
       state.phase = Game;
-      reset_game_state(&state);
     }
 
     // wait until time has past for this frame
@@ -71,7 +71,8 @@ void gameloop(FrameBuffer *fb) {
 }
 
 void title_tick(gamestate_t *state) {
-  draw_text(state->fb, "Press up arrow to start!", (Point){80, 210}, WHITE, 2);
+  draw_text(state->fb, "Press up arrow to start!", (Point){80, 300}, WHITE, 2);
+  render_game(state);
 }
 
 void game_tick(gamestate_t *state) {
@@ -102,19 +103,6 @@ void game_tick(gamestate_t *state) {
     state->phase = EndScreen;
   }
 
-  // update and render all obstacles
-  for (int i = 0; i < state->obstacles_count; i++) {    
-    obstacle_state_t* obs = state->obstacles[i];
-
-    uint32_t left = obs->x-(OBSTACLE_WIDTH/2.0);
-    uint32_t right = obs->x+(OBSTACLE_WIDTH/2.0);
-    uint32_t top = GROUND-OBSTACLE_HEIGHT-OBSTACLE_Y;
-    uint32_t bottom = GROUND-OBSTACLE_Y;
-
-    Point corners[4] = {(Point){left, bottom}, (Point){right, bottom}, (Point){right, top}, (Point){left, top}};
-    fill_quad(state->fb, corners, BLUE, 0);
-  }
-
   // compute bear height
   if (state->bear_y == 0) {
     // if jump, then give bear upwards velocity
@@ -132,14 +120,7 @@ void game_tick(gamestate_t *state) {
     state->bear_velocity = 0;
   }
 
-  // draw everything
-  uint32_t left = BEAR_X-(BEAR_WIDTH/2);
-  uint32_t right = BEAR_X+(BEAR_WIDTH/2);
-  uint32_t top = GROUND-BEAR_HEIGHT-state->bear_y;
-  uint32_t bottom = GROUND-state->bear_y;
-
-	Point corners[4] = {(Point){left, bottom}, (Point){right, bottom}, (Point){right, top}, (Point){left, top}};
-	fill_quad(state->fb, corners, RED, 0);
+  render_game(state);
 }
 
 void endscreen_tick(gamestate_t *state) {
@@ -205,4 +186,29 @@ uint8_t check_collisions(gamestate_t *state) {
   }
 
   return 0;
+}
+
+void render_game(gamestate_t *state) {
+  // render all obstacles
+  for (int i = 0; i < state->obstacles_count; i++) {    
+    obstacle_state_t* obs = state->obstacles[i];
+
+    uint32_t left = obs->x-(OBSTACLE_WIDTH/2.0);
+    uint32_t right = obs->x+(OBSTACLE_WIDTH/2.0);
+    uint32_t top = GROUND-OBSTACLE_HEIGHT-OBSTACLE_Y;
+    uint32_t bottom = GROUND-OBSTACLE_Y;
+
+    Point corners[4] = {(Point){left, bottom}, (Point){right, bottom}, (Point){right, top}, (Point){left, top}};
+    fill_quad(state->fb, corners, BLUE, 0);
+  }
+
+  // render bear
+  uint32_t left = BEAR_X-(BEAR_WIDTH/2);
+  uint32_t right = BEAR_X+(BEAR_WIDTH/2);
+  uint32_t top = GROUND-BEAR_HEIGHT-state->bear_y;
+  uint32_t bottom = GROUND-state->bear_y;
+
+	Point corners[4] = {(Point){left, bottom}, (Point){right, bottom}, (Point){right, top}, (Point){left, top}};
+	fill_quad(state->fb, corners, RED, 0);
+
 }
