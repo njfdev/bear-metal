@@ -4,6 +4,16 @@
 #include "frame_buffer_utils.h"
 #include "random.h"
 
+typedef enum {
+  Spike,
+  Bird
+} obstacle_type_t;
+
+typedef struct {
+  float x;
+  obstacle_type_t type;
+} obstacle_state_t;
+
 typedef struct {
   FrameBuffer *fb;
   random_state_t rng_state;
@@ -11,6 +21,11 @@ typedef struct {
 
   float bear_y;
   float bear_velocity;
+  
+  uint32_t next_obstacle_millis;
+  uint32_t obstacles_allocated;
+  uint32_t obstacles_count;
+  obstacle_state_t** obstacles;
 } gamestate_t;
 
 /*
@@ -41,5 +56,8 @@ void game_tick(gamestate_t *state);
  * @param state pointer to current game state
 */
 void reset_game_state(gamestate_t *state);
+
+void add_obstacle(gamestate_t *state, obstacle_state_t obs_state);
+void remove_obstacle(gamestate_t *state, uint32_t index);
 
 #endif

@@ -30,6 +30,10 @@ void* malloc(unsigned long n) {
     heap_table[i] = address;
   }
 
+  // set everything to 0
+  for (int i = address; i < address+n; i++)
+    *((char*)(address+i)) = 0;
+
   return (void*) address;
 }
 
