@@ -5,6 +5,7 @@
 #include "general_utils.h"
 
 void draw_polygon_center(FrameBuffer *fb, Point center, int num_sides, int circumradius, Color color, int thickness, int fill, int antialiasing) {
+	// TODO: Fix xiaolin and fix thicker lines not being rendered entirely correctly
 	// we just need to calculate each point and then draw lines between them
 	Point vertices[num_sides];
 	float angle_mult = (4.0f * HALF_PI) / num_sides;
