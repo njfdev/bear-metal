@@ -2,15 +2,22 @@
 #include "line.h"
 #include "quad.h"
 #include "frame_buffer_utils.h"
+#include "general_utils.h"
 
-void draw_polygon_center(FrameBuffer *fb, Point center, int num_sides, Color color, int thickness, int fill, int antialiasing) {
+void draw_polygon_center(FrameBuffer *fb, Point center, int num_sides, int circumradius, Color color, int thickness, int fill, int antialiasing) {
 	// we just need to calculate each point and then draw lines between them
 	Point vertices[num_sides];
-	
+	float angle_mult = (4.0f * HALF_PI) / num_sides;
+	for (int i = 1; i <= num_sides; i++) {
+		float angle = angle_mult * i;
+		int y = (int)(sin(angle) * circumradius + center.y);
+		int x = (int)(sin(angle + HALF_PI) * circumradius + center.x);
+		vertices[i - 1] = (Point){x, y};
+	}	
+	draw_polygon_vertices(fb, vertices, num_sides, color, thickness, fill, antialiasing);
 }
 
 void draw_polygon_vertices(FrameBuffer *fb, Point *vertices, int num_sides, Color color, int thickness, int fill, int antialiasing) {
-	// TODO: Implement fill
 	for (int i = 0; i < num_sides; i++) {
 		draw_line(fb, vertices[i], vertices [(i + 1) % num_sides], color, antialiasing, thickness);
 	}
