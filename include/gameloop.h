@@ -2,9 +2,11 @@
 #define _GAMELOOP_H_
 
 #include "frame_buffer_utils.h"
+#include "random.h"
 
 typedef struct {
   FrameBuffer *fb;
+  random_state_t rng_state;
   float dt;
 
   float bear_y;

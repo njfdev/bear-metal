@@ -61,7 +61,9 @@ void gameloop(FrameBuffer *fb) {
 
 void title_tick(gamestate_t *state) {
   draw_text(state->fb, "Press up arrow to start!", (Point){80, 210}, WHITE, 2);
-
+  char text[20] = "RNG: ";
+  uint_to_string((uint32_t)(random_next(&state->rng_state)*4294967296), text+5, 15);
+  draw_text(state->fb, text, (Point){80, 310}, WHITE, 2);
 }
 
 void game_tick(gamestate_t *state) {
@@ -95,6 +97,7 @@ void game_tick(gamestate_t *state) {
 }
 
 void reset_game_state(gamestate_t *state) {
+  state->rng_state = (random_state_t) {.seed = millis()};
   state->dt = 1.0/LOOP_FREQUENCY;
 
   state->bear_y = 0;
