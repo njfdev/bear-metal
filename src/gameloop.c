@@ -28,9 +28,6 @@ const float JUMP_VELOCITY = 500.0;
 const float RUN_VELOCITY = 350.0;
 
 void gameloop(FrameBuffer *fb) {
-
-  int phase = 0;
-  
 	Color background = {0, 0, 0, 0};
 
   clear_screen(fb, background);
@@ -40,22 +37,26 @@ void gameloop(FrameBuffer *fb) {
 
   uint32_t last_millis = millis();
   while (1) {
-    clear_screen(fb, background);
+    if (state.phase != EndScreen) {
+      clear_screen(fb, background);
+    }
 
-    if (phase == 0) {
+    if (state.phase == Title) {
       title_tick(&state);
-
-      // if up pressed, then start
-      if (check_pressed(Up)) {
-        phase = 1;
-        reset_game_state(&state);
+    } else if (state.phase == Game) {
+      game_tick(&state);
+      if (check_pressed(Down)) {
+        state.phase = EndScreen;
       }
     } else {
-      game_tick(&state);
+      endscreen_tick(&state);
+    }
 
-      if (check_pressed(Enter)) {
-        phase = 0;
-      }
+    if (check_pressed(Enter) && state.phase != Title) {
+      state.phase = Title;
+    } else if (check_pressed(Up) && state.phase == Title) {
+      state.phase = Game;
+      reset_game_state(&state);
     }
 
     // wait until time has past for this frame
@@ -71,9 +72,6 @@ void gameloop(FrameBuffer *fb) {
 
 void title_tick(gamestate_t *state) {
   draw_text(state->fb, "Press up arrow to start!", (Point){80, 210}, WHITE, 2);
-  char text[20] = "RNG: ";
-  uint_to_string((uint32_t)(random_next(&state->rng_state)*4294967296), text+5, 15);
-  draw_text(state->fb, text, (Point){80, 310}, WHITE, 2);
 }
 
 void game_tick(gamestate_t *state) {
@@ -97,6 +95,11 @@ void game_tick(gamestate_t *state) {
 
       i--;
     }
+  }
+
+  // if collision, set for return
+  if (check_collisions(state) == 1) {
+    state->phase = EndScreen;
   }
 
   // update and render all obstacles
@@ -130,8 +133,6 @@ void game_tick(gamestate_t *state) {
   }
 
   // draw everything
-  draw_text(state->fb, "Running!", (Point){20, GROUND+40}, WHITE, 1);
-
   uint32_t left = BEAR_X-(BEAR_WIDTH/2);
   uint32_t right = BEAR_X+(BEAR_WIDTH/2);
   uint32_t top = GROUND-BEAR_HEIGHT-state->bear_y;
@@ -139,6 +140,10 @@ void game_tick(gamestate_t *state) {
 
 	Point corners[4] = {(Point){left, bottom}, (Point){right, bottom}, (Point){right, top}, (Point){left, top}};
 	fill_quad(state->fb, corners, RED, 0);
+}
+
+void endscreen_tick(gamestate_t *state) {
+  draw_text(state->fb, "Game Over!", (Point){220, 100}, WHITE, 2);
 }
 
 void reset_game_state(gamestate_t *state) {
@@ -183,4 +188,21 @@ void remove_obstacle(gamestate_t *state, uint32_t index) {
   state->obstacles[state->obstacles_count] = 0;
   
   state->obstacles_count -= 1;
+}
+
+uint8_t check_collisions(gamestate_t *state) {
+  for (int i = 0; i < state->obstacles_count; i++) {
+    obstacle_state_t* obs = state->obstacles[i];
+
+    // check if x and y align
+    if (
+      abs(BEAR_X-obs->x) < (BEAR_WIDTH/2.0)+(OBSTACLE_WIDTH/2.0)
+      && state->bear_y < OBSTACLE_HEIGHT
+    
+    ) {
+      return 1;
+    }
+  }
+
+  return 0;
 }

@@ -5,6 +5,12 @@
 #include "random.h"
 
 typedef enum {
+  Title,
+  Game,
+  EndScreen,
+} game_phase_t;
+
+typedef enum {
   Spike,
   Bird
 } obstacle_type_t;
@@ -15,6 +21,8 @@ typedef struct {
 } obstacle_state_t;
 
 typedef struct {
+  game_phase_t phase;
+
   FrameBuffer *fb;
   random_state_t rng_state;
   float dt;
@@ -49,6 +57,8 @@ void title_tick(gamestate_t *state);
 */
 void game_tick(gamestate_t *state);
 
+void endscreen_tick(gamestate_t *state);
+
 /*
  * Set the game state to reasonable defaults. FrameBuffer is never
  * touched.
@@ -59,5 +69,6 @@ void reset_game_state(gamestate_t *state);
 
 void add_obstacle(gamestate_t *state, obstacle_state_t obs_state);
 void remove_obstacle(gamestate_t *state, uint32_t index);
+uint8_t check_collisions(gamestate_t *state);
 
 #endif
