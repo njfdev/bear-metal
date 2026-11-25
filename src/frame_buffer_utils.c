@@ -71,3 +71,20 @@ void draw_pixel_array(FrameBuffer *fb, PixelList pixels) {
 		}
 	}
 }
+
+int add_pixel_to_array(PixelList pixels, Point point, Color color) {
+	if (pixels.count == pixels.capacity) {
+		return 0;
+	}
+	Pixel pixel = (Pixel){.point = point, .color = color};
+	pixels.pixels[pixels.count] = pixel;
+	pixels.count++;
+	return 1;
+}
+
+void clear_pixel_array(PixelList pixels) {
+	for (int i = 0; i < pixels.count; i++) {
+		pixels.pixels[i] = NULL;
+	}
+	pixels.count = 0;
+}

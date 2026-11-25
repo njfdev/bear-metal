@@ -88,4 +88,21 @@ void clear_screen(FrameBuffer *fb, Color color);
 */
 void draw_pixel_array(FrameBuffer *fb, PixelList pixels);
 
+/*
+* A helper function to add a pixel to a PixelList
+* 
+* @param pixels - The PixelList
+* @param point - The Point to add
+* @param color - The Color of the Point
+* @return int - 1 on success, 0 on failure (i.e. the PixelList is full)
+*/
+int add_pixel_to_array(PixelList pixels, Point point, Color color);
+
+/*
+* A helper function to clear a PixelList
+* 
+* @param pixels - The PixelList to clear
+*/
+void clear_pixel_array(PixelList pixels);
+
 #endif
