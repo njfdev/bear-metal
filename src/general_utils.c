@@ -97,3 +97,36 @@ void uint_to_string(unsigned int val, char *buf, unsigned int buf_len) {
 		i--;
 	}
 }
+
+static float normalize_angle(float angle) {
+	float pi = 2.0f * HALF_PI;
+	float two_pi = 4.0f * HALF_PI;
+
+	while (angle > pi) {
+		angle -= two_pi;
+	}
+	while (angle < -pi) {
+		angle += two_pi;
+	}
+
+	if (angle > HALF_PI) {
+		return pi - angle;
+	}
+	if (angle < -HALF_PI) {
+		return -pi - angle;
+	}
+	return angle;
+}
+
+float sin(float angle) {
+	float x = normalize_angle(angle);
+	float term = x;
+	float sum = term;
+	float x2 = x * x;
+	for (int i = 1; i < 5; i++) {
+		term *= -x2 / ((2 * i) * (2 * i + 1));
+		sum += term;
+	}
+	
+	return sum;
+}

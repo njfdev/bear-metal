@@ -76,4 +76,21 @@ int max_int(int a, int b);
 */
 void uint_to_string(unsigned int val, char *buf, unsigned int buf_len);
 
+/*
+* A function to normalize an angle to its equivalent sine value between 0 and pi/2
+*
+* @param angle - The angle to normalize
+* @return float - The angle mapped between 0 and pi/2
+*/
+static float normalize_angle(float angle);
+
+/*
+* A function to approximate sine using Taylor series
+*
+* @param angle - The angle (in radians)
+@ @return float - The sine of the angle
+*/
+#define HALF_PI 1.5707963267949
+float sin(float angle);
+
 #endif
