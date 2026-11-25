@@ -55,3 +55,19 @@ void clear_screen(FrameBuffer *fb, Color color) {
 	}
 
 }
+
+void draw_pixel_array(FrameBuffer *fb, PixelList pixels) {
+	Color prev = pixels.pixels[0].color;
+	uint32_t packed_prev = pack_color(prev, fb);
+	for (int i = 0; i < pixels.count; i++) {
+		Color color = pixels.pixels[i].color;
+		// check if the color is the same -- start with alpha since most likely to be different
+		if (color.a == prev.a && color.r == prev.r && color.g == prev.g && color.b == prev.b) {
+			put_pixel_pre_packed(fb, pixels.pixels[i].pixel, packed_prev);
+		} else {
+			put_pixel(fb, pixels.pixels[i].pixel, color);
+			prev = color;
+			packed_prev = pack_color(prev, fb);
+		}
+	}
+}

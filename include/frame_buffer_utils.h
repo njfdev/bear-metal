@@ -33,6 +33,17 @@ typedef struct {
 	size_t y;
 } Point;
 
+typedef struct {
+	Point pixel;
+	Color color;
+} Pixel;
+
+typedef struct {
+	Pixel *pixels;
+	size_t capacity;
+	size_t count;
+} PixelList;
+
 /*
 * A function to take a Color struct and pack it into a uint32_t
 * 
@@ -67,5 +78,14 @@ void put_pixel_pre_packed(FrameBuffer *fb, Point point, uint32_t color);
 * @param color - A Color representing the color to fill the screen with
 */
 void clear_screen(FrameBuffer *fb, Color color);
+
+/*
+* A function to draw a provided list of pixels to the screen
+* 
+* @param fb - A pointer to the frame buffer
+* @param pixels - A list of Pixels
+* @param num_pixels - The length of the pixels list
+*/
+void draw_pixel_array(FrameBuffer *fb, PixelList pixels);
 
 #endif
