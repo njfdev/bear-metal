@@ -17,7 +17,8 @@ typedef struct {
 * @param pixels - A PixelList to add pixels to
 * @param corners - A list of 4 Points representing the corners of the quadrilateral
 * @param color - The Color of the quadrilateral
+* @return int - 1 on success, 0 on failure
 */
-void fill_quad(FrameBuffer *fb, PixelList *pixels, Point corners[4], Color color, int antialiasing);
+int fill_quad(FrameBuffer *fb, PixelList *pixels, Point corners[4], Color color, int antialiasing);
 
 #endif
