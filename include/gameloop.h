@@ -11,8 +11,9 @@ typedef enum {
 } game_phase_t;
 
 typedef enum {
-  Spike,
-  Bird
+  Hive,
+  Bee,
+  HighBee
 } obstacle_type_t;
 
 typedef struct {
@@ -29,6 +30,7 @@ typedef struct {
 
   float bear_y;
   float bear_velocity;
+  float bear_height;
   
   uint32_t next_obstacle_millis;
   uint32_t obstacles_allocated;
@@ -71,5 +73,6 @@ void render_game(gamestate_t *state);
 void add_obstacle(gamestate_t *state, obstacle_state_t obs_state);
 void remove_obstacle(gamestate_t *state, uint32_t index);
 uint8_t check_collisions(gamestate_t *state);
+uint32_t obstacle_y(obstacle_type_t type);
 
 #endif

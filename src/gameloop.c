@@ -3,6 +3,7 @@
 #include "font.h"
 #include "general_utils.h"
 #include "keyboard.h"
+#include "line.h"
 #include "quad.h"
 #include "random.h"
 #include "timer.h"
@@ -11,20 +12,24 @@
 const uint32_t LOOP_FREQUENCY = 60;
 
 const uint32_t BEAR_X = 80;
-const uint32_t BEAR_WIDTH = 25;
-const uint32_t BEAR_HEIGHT = 30;
+const uint32_t BEAR_WIDTH = 30;
+const uint32_t BEAR_STANDING_HEIGHT = 45;
+const uint32_t BEAR_DUCKING_HEIGHT = 25;
+const float BEAR_DUCKING_VELOCITY = -600;
 
 const uint32_t OBSTACLE_WIDTH = 30;
 const uint32_t OBSTACLE_HEIGHT = 30;
-const uint32_t OBSTACLE_Y = 0;
+const uint32_t OBSTACLE_Y_INC = 35;
+const float BEE_RATIO = 0.5;
 
 const uint32_t OBSTACLE_SPAWN_MIN_MILLIS = 500;
 const uint32_t OBSTACLE_SPAWN_MAX_MILLIS = 1500;
 
 const uint32_t GROUND = 200;
+const uint32_t GROUND_THICKNESS = 2;
 
-const float GRAVITY = -1150.0;
-const float JUMP_VELOCITY = 500.0;
+const float GRAVITY = -2500.0;
+const float JUMP_VELOCITY = 700.0;
 const float RUN_VELOCITY = 350.0;
 
 void gameloop(FrameBuffer *fb) {
@@ -45,9 +50,6 @@ void gameloop(FrameBuffer *fb) {
       title_tick(&state);
     } else if (state.phase == Game) {
       game_tick(&state);
-      if (check_pressed(Down)) {
-        state.phase = EndScreen;
-      }
     } else {
       endscreen_tick(&state);
     }
@@ -78,8 +80,9 @@ void title_tick(gamestate_t *state) {
 void game_tick(gamestate_t *state) {
   // generate obstacle if necessary
   if (state->next_obstacle_millis < millis()) {
+    float type_rng = random_next(&state->rng_state);
     add_obstacle(state, (obstacle_state_t) {
-      .type = Spike,
+      .type = type_rng > BEE_RATIO ? Hive : type_rng > BEE_RATIO/2.0 ? Bee : HighBee,
       .x = state->fb->width-OBSTACLE_WIDTH
     });
     state->next_obstacle_millis = millis()+(random_next(&state->rng_state)*(OBSTACLE_SPAWN_MAX_MILLIS-OBSTACLE_SPAWN_MIN_MILLIS))+OBSTACLE_SPAWN_MIN_MILLIS;
@@ -98,17 +101,18 @@ void game_tick(gamestate_t *state) {
     }
   }
 
-  // if collision, set for return
-  if (check_collisions(state) == 1) {
-    state->phase = EndScreen;
-  }
-
-  // compute bear height
+  // compute bear height/y
   if (state->bear_y == 0) {
     // if jump, then give bear upwards velocity
     if (check_pressed(Up)) {
       state->bear_velocity = JUMP_VELOCITY;
     }
+  }
+  if (check_pressed(Down)) {
+    state->bear_height = BEAR_DUCKING_HEIGHT;
+    state->bear_velocity = BEAR_DUCKING_VELOCITY;
+  } else {
+    state->bear_height = BEAR_STANDING_HEIGHT;
   }
 
   // compute velocity change and offset
@@ -121,6 +125,11 @@ void game_tick(gamestate_t *state) {
   }
 
   render_game(state);
+
+  // if collision, set for return
+  if (check_collisions(state) == 1) {
+    state->phase = EndScreen;
+  }
 }
 
 void endscreen_tick(gamestate_t *state) {
@@ -131,6 +140,7 @@ void reset_game_state(gamestate_t *state) {
   state->rng_state = (random_state_t) {.seed = millis()};
   state->dt = 1.0/LOOP_FREQUENCY;
 
+  state->bear_height = BEAR_STANDING_HEIGHT;
   state->bear_y = 0;
   state->bear_velocity = 0;
 
@@ -178,8 +188,7 @@ uint8_t check_collisions(gamestate_t *state) {
     // check if x and y align
     if (
       abs(BEAR_X-obs->x) < (BEAR_WIDTH/2.0)+(OBSTACLE_WIDTH/2.0)
-      && state->bear_y < OBSTACLE_HEIGHT
-    
+      && abs(state->bear_y-obstacle_y(obs->type)) < (state->bear_height/2.0)+(OBSTACLE_HEIGHT/2.0)
     ) {
       return 1;
     }
@@ -189,26 +198,38 @@ uint8_t check_collisions(gamestate_t *state) {
 }
 
 void render_game(gamestate_t *state) {
+  // render floor
+  draw_line(state->fb, (Point){0, GROUND+GROUND_THICKNESS-1}, (Point){state->fb->width, GROUND+GROUND_THICKNESS-1}, WHITE, 0, GROUND_THICKNESS);
+
   // render all obstacles
   for (int i = 0; i < state->obstacles_count; i++) {    
     obstacle_state_t* obs = state->obstacles[i];
 
     uint32_t left = obs->x-(OBSTACLE_WIDTH/2.0);
     uint32_t right = obs->x+(OBSTACLE_WIDTH/2.0);
-    uint32_t top = GROUND-OBSTACLE_HEIGHT-OBSTACLE_Y;
-    uint32_t bottom = GROUND-OBSTACLE_Y;
+    uint32_t top = GROUND-OBSTACLE_HEIGHT-obstacle_y(obs->type);
+    uint32_t bottom = GROUND-obstacle_y(obs->type);
 
     Point corners[4] = {(Point){left, bottom}, (Point){right, bottom}, (Point){right, top}, (Point){left, top}};
-    fill_quad(state->fb, corners, BLUE, 0);
+    fill_quad(state->fb, corners, WHITE, 0);
   }
 
   // render bear
   uint32_t left = BEAR_X-(BEAR_WIDTH/2);
   uint32_t right = BEAR_X+(BEAR_WIDTH/2);
-  uint32_t top = GROUND-BEAR_HEIGHT-state->bear_y;
+  uint32_t top = GROUND-state->bear_height-state->bear_y;
   uint32_t bottom = GROUND-state->bear_y;
 
 	Point corners[4] = {(Point){left, bottom}, (Point){right, bottom}, (Point){right, top}, (Point){left, top}};
 	fill_quad(state->fb, corners, RED, 0);
 
+}
+
+uint32_t obstacle_y(obstacle_type_t type) {
+  switch (type) {
+    case Hive: return 0;
+    case Bee: return OBSTACLE_Y_INC;
+    case HighBee: return OBSTACLE_Y_INC*2;
+  }
+  return 0;
 }
