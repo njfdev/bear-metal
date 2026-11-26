@@ -5,7 +5,7 @@
 #include "general_utils.h"
 #include "quad.h"
 
-static void draw_line_no_thickness(FrameBuffer *fb, PixelList pixels, Point start, Point end, Color color) {
+static void draw_line_no_thickness(FrameBuffer *fb, PixelList *pixels, Point start, Point end, Color color) {
 	int x = (int)start.x;
 	int y = (int)start.y;
 	int dx = (int)(end.x - start.x);
@@ -84,7 +84,7 @@ static void find_quad_corners(Point start, Point end, int thickness, Point corne
 	corners[3] = (Point){x3, y3};
 }
 
-static void draw_line_xiaolin(FrameBuffer *fb, PixelList pixels, Point start, Point end, Color color) {
+static void draw_line_xiaolin(FrameBuffer *fb, PixelList *pixels, Point start, Point end, Color color) {
 	// TODO: Implement an alpha channel
 	int x0 = start.x;
 	int y0 = start.y;
@@ -144,7 +144,7 @@ static void draw_line_xiaolin(FrameBuffer *fb, PixelList pixels, Point start, Po
 	}
 }
 
-void draw_line(FrameBuffer *fb, PixelList pixels, Point start, Point end, Color color, int antialiasing, int thickness) {
+void draw_line(FrameBuffer *fb, PixelList *pixels, Point start, Point end, Color color, int antialiasing, int thickness) {
 	if (antialiasing) {
 		// we are using xiaolin
 		if (thickness > 1) {

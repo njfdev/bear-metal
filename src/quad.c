@@ -2,7 +2,7 @@
 #include <stddef.h>
 #include "quad.h"
 
-void fill_quad(FrameBuffer *fb, PixelList pixels, Point corners[4], Color color, int antialiasing) {	
+void fill_quad(FrameBuffer *fb, PixelList *pixels, Point corners[4], Color color, int antialiasing) {	
 	uint32_t packed_color = pack_color(color, fb);
 
 	ScanEdge edges[4];

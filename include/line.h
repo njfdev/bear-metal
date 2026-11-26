@@ -12,7 +12,7 @@
 * @param end - A Point representing the end point of the line
 * @param color - The Color to draw the line
 */
-static void draw_line_no_thickness(FrameBuffer *fb, PixelList pixels, Point start, Point end, Color color);
+static void draw_line_no_thickness(FrameBuffer *fb, PixelList *pixels, Point start, Point end, Color color);
 
 /*
 * A function to find the four corners of a quadrilateral representing a line with thickness > 1
@@ -33,7 +33,7 @@ static void find_quad_corners(Point start, Point end, int thickness, Point corne
 * @param end - The end Point of the line
 * @param color - The Color of the line
 */
-static void draw_line_xiaolin(FrameBuffer *fb, PixelList pixels, Point start, Point end, Color color);
+static void draw_line_xiaolin(FrameBuffer *fb, PixelList *pixels, Point start, Point end, Color color);
 
 /*
 * A function to draw a line on the provided frame buffer
@@ -46,6 +46,6 @@ static void draw_line_xiaolin(FrameBuffer *fb, PixelList pixels, Point start, Po
 * @param antialiasing - Whether or not to antialias the line
 * @param thickness - The thickness of the line (in px)
 */
-void draw_line(FrameBuffer *fb, PixelList pixels, Point start, Point end, Color color, int antialiasing, int thickness);
+void draw_line(FrameBuffer *fb, PixelList *pixels, Point start, Point end, Color color, int antialiasing, int thickness);
 
 #endif
