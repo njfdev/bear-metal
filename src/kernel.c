@@ -11,6 +11,7 @@
 #include "timer.h"
 #include "colors.h"
 #include "circle.h"
+#include "polygon.h"
 
 FrameBuffer fb = {};
 
@@ -38,39 +39,28 @@ void kernel_main(unsigned long magic, multiboot_info_t *info) {
 		.alpha_shift = 24
 	};
 
-	gameloop(&fb);
+	// gameloop(&fb);
 
 	Color background = {20, 20, 20, 0};
 
 	// set the background to be gray
 	clear_screen(&fb, background);
+	PixelList pixels = {.pixels = &((Pixel){0}), .capacity = 1024, .count = 0};
+	// draw_polygon_center(&fb, (Point){200, 200}, 4, 80, SHAMROCK, 1, 0, 0);
 	// draw some example text
-	draw_text(&fb, "Hello World", (Point){20, 20}, WHITE, 1);
+	// draw_text(&fb, "Hello World", (Point){20, 20}, WHITE, 1);
 	// draw a line
-	draw_line(&fb, (Point){200, 260}, (Point){300, 220}, OCRE, 0, 5); 
+	draw_line(&fb, pixels, (Point){200, 260}, (Point){300, 220}, OCRE, 0, 5); 
 	// draw a quad
-	Point corners[4] = {(Point){50, 50}, (Point){110, 50}, (Point){120, 140}, (Point){40, 130}};
-	fill_quad(&fb, corners, RED, 0);
+	// Point corners[4] = {(Point){50, 50}, (Point){110, 50}, (Point){120, 140}, (Point){40, 130}};
+	// fill_quad(&fb, corners, RED, 0);
 	// draw a circle
-	draw_circle(&fb, (Point){250, 250}, 50, BURPLE, 5, 0);
+	// draw_circle(&fb, (Point){250, 250}, 50, BURPLE, 5, 0);
 
 	int count = 0;
 
 	int i = 0;
 	while (1) {
-		char int_str[20] = "Enter? ";
-		uint_to_string(check_pressed(Enter), int_str+7, 11);
-
-		i++;
-
-		if (i == 20) {
-			i = 0;
-			clear_screen(&fb, background);
-		}
-
-		draw_text(&fb, int_str, (Point){20, 40 + 20*i}, WHITE, 1);
-		
-		timer_sleep(1000);
-		count += 1;
+		draw_pixel_array(&fb, pixels);
 	}
 }
