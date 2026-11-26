@@ -56,36 +56,36 @@ void clear_screen(FrameBuffer *fb, Color color) {
 
 }
 
-void draw_pixel_array(FrameBuffer *fb, PixelList pixels) {
-	Color prev = pixels.pixels[0].color;
+void draw_pixel_array(FrameBuffer *fb, PixelList *pixels) {
+	Color prev = pixels->pixels[0].color;
 	uint32_t packed_prev = pack_color(prev, fb);
-	for (int i = 0; i < pixels.count; i++) {
-		Color color = pixels.pixels[i].color;
+	for (int i = 0; i < pixels->count; i++) {
+		Color color = pixels->pixels[i].color;
 		// check if the color is the same -- start with alpha since most likely to be different
 		if (color.a == prev.a && color.r == prev.r && color.g == prev.g && color.b == prev.b) {
-			put_pixel_pre_packed(fb, pixels.pixels[i].pixel, packed_prev);
+			put_pixel_pre_packed(fb, pixels->pixels[i].pixel, packed_prev);
 		} else {
-			put_pixel(fb, pixels.pixels[i].pixel, color);
+			put_pixel(fb, pixels->pixels[i].pixel, color);
 			prev = color;
 			packed_prev = pack_color(prev, fb);
 		}
 	}
 }
 
-void clear_pixel_array(PixelList pixels) {
-	for (int i = 0; i < pixels.count; i++) {
-		pixels.pixels[i] = (Pixel){0};
+void clear_pixel_array(PixelList *pixels) {
+	for (int i = 0; i < pixels->count; i++) {
+		pixels->pixels[i] = (Pixel){0};
 	}
-	pixels.count = 0;
+	pixels->count = 0;
 }
 
-void add_pixel_to_array(FrameBuffer *fb, PixelList pixels, Point point, Color color) {
-	if (pixels.count == pixels.capacity) {
+void add_pixel_to_array(FrameBuffer *fb, PixelList *pixels, Point point, Color color) {
+	if (pixels->count == pixels->capacity) {
 		draw_pixel_array(fb, pixels);
 		clear_pixel_array(pixels);
 		add_pixel_to_array(fb, pixels, point, color);
 	}
 	Pixel pixel = (Pixel){.pixel = point, .color = color};
-	pixels.pixels[pixels.count] = pixel;
-	pixels.count++;
+	pixels->pixels[pixels->count] = pixel;
+	pixels->count++;
 }
