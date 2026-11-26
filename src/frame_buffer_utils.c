@@ -74,7 +74,7 @@ void draw_pixel_array(FrameBuffer *fb, PixelList pixels) {
 
 void clear_pixel_array(PixelList pixels) {
 	for (int i = 0; i < pixels.count; i++) {
-		pixels.pixels[i] = NULL;
+		pixels.pixels[i] = (Pixel){0};
 	}
 	pixels.count = 0;
 }
@@ -85,7 +85,7 @@ void add_pixel_to_array(FrameBuffer *fb, PixelList pixels, Point point, Color co
 		clear_pixel_array(pixels);
 		add_pixel_to_array(fb, pixels, point, color);
 	}
-	Pixel pixel = (Pixel){.point = point, .color = color};
+	Pixel pixel = (Pixel){.pixel = point, .color = color};
 	pixels.pixels[pixels.count] = pixel;
 	pixels.count++;
 }
