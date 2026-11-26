@@ -5,9 +5,7 @@
 #include "general_utils.h"
 #include "quad.h"
 
-static void draw_line_no_thickness(FrameBuffer *fb, Point start, Point end, Color color) {
-	uint32_t packed_color = pack_color(color, fb);
-	
+static void draw_line_no_thickness(FrameBuffer *fb, PixelList pixels, Point start, Point end, Color color) {
 	int x = (int)start.x;
 	int y = (int)start.y;
 	int dx = (int)(end.x - start.x);
@@ -19,7 +17,7 @@ static void draw_line_no_thickness(FrameBuffer *fb, Point start, Point end, Colo
 	int error = dx - dy;
 	
 	while (1) {
-		put_pixel_pre_packed(fb, (Point){x, y}, packed_color);
+		add_pixel_to_array(fb, pixels, (Point){x, y}, color);
 
 		if (x == end.x && y == end.y) {
 			break;
@@ -86,7 +84,7 @@ static void find_quad_corners(Point start, Point end, int thickness, Point corne
 	corners[3] = (Point){x3, y3};
 }
 
-static void draw_line_xiaolin(FrameBuffer *fb, Point start, Point end, Color color) {
+static void draw_line_xiaolin(FrameBuffer *fb, PixelList pixels, Point start, Point end, Color color) {
 	// TODO: Implement an alpha channel
 	int x0 = start.x;
 	int y0 = start.y;
@@ -137,33 +135,33 @@ static void draw_line_xiaolin(FrameBuffer *fb, Point start, Point end, Color col
 		
 		if (first.a > 0) {
 			Point pixel = steep ? (Point){y, x} : (Point){x, y}; // swap back if needed
-			put_pixel(fb, pixel, first);
+			add_pixel_to_array(fb, pixels, pixel, color);
 		}
 		if (second.a > 0) {
-			Point pixel = steep ? (Point){y, x} : (Point){x, y};
-			put_pixel(fb, pixel, second);	
+			Point pixel = steep ? (Point){y, x} : (Point){x, y};	
+			add_pixel_to_array(fb, pixels, pixel, color);
 		}
 	}
 }
 
-void draw_line(FrameBuffer *fb, Point start, Point end, Color color, int antialiasing, int thickness) {
+void draw_line(FrameBuffer *fb, PixelList pixels, Point start, Point end, Color color, int antialiasing, int thickness) {
 	if (antialiasing) {
 		// we are using xiaolin
 		if (thickness > 1) {
 			Point corners[4]; 
 			find_quad_corners(start, end, thickness, corners);
-			fill_quad(fb, corners, color, 1);
+			fill_quad(fb, pixels, corners, color, 1);
 		} else {
-			draw_line_xiaolin(fb, start, end, color);
+			draw_line_xiaolin(fb, pixels, start, end, color);
 		}
 	} else {
 		// in this case we want to use bresenham's
 		if (thickness > 1) {
 			Point corners[4]; 
 			find_quad_corners(start, end, thickness, corners);
-			fill_quad(fb, corners, color, 0);
+			fill_quad(fb, pixels, corners, color, 0);
 		} else {
-			draw_line_no_thickness(fb, start, end, color);
+			draw_line_no_thickness(fb, pixels, start, end, color);
 		}
 	}
 }

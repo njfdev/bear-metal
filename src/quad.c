@@ -2,7 +2,7 @@
 #include <stddef.h>
 #include "quad.h"
 
-void fill_quad(FrameBuffer *fb, Point corners[4], Color color, int antialiasing) {	
+void fill_quad(FrameBuffer *fb, PixelList pixels, Point corners[4], Color color, int antialiasing) {	
 	uint32_t packed_color = pack_color(color, fb);
 
 	ScanEdge edges[4];
@@ -63,14 +63,14 @@ void fill_quad(FrameBuffer *fb, Point corners[4], Color color, int antialiasing)
 			if (antialiasing && x == (int)left) {
 				// x <= left so we just change opacity of this pixel
 				int alpha = (int)(color.a * (1 - (left - x)));
-				put_pixel(fb, (Point){x, y}, (Color){color.r, color.g, color.b, alpha});
+				add_pixel_to_array(fb, pixels, (Point){x, y}, (Color){color.r, color.g, color.b, alpha});
 			} else if (antialiasing && x >= (right - 1)) {
 				// we need to color this pixel and possibly the pixel after it
-				put_pixel_pre_packed(fb, (Point){x, y}, packed_color);
+				add_pixel_to_array(fb, pixels, (Point){x, y}, color);
 				int alpha = (int)(color.a * (right - x));
-				put_pixel(fb, (Point){x + 1, y}, (Color){color.r, color.g, color.b, alpha});
+				add_pixel_to_array(fb, pixels, (Point){x, y}, (Color){color.r, color.g, color.b, alpha});
 			} else {
-				put_pixel_pre_packed(fb, (Point){x, y}, packed_color);
+				add_pixel_to_array(fb, pixels, (Point){x, y}, color);
 			}
 		}
 	}
