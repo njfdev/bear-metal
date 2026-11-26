@@ -76,13 +76,12 @@ void clear_pixel_array(PixelList *pixels) {
 	pixels->count = 0;
 }
 
-void add_pixel_to_array(FrameBuffer *fb, PixelList *pixels, Point point, Color color) {
+int add_pixel_to_array(FrameBuffer *fb, PixelList *pixels, Point point, Color color) {
 	if (pixels->count == pixels->capacity) {
-		draw_pixel_array(fb, pixels);
-		clear_pixel_array(pixels);
-		add_pixel_to_array(fb, pixels, point, color);
+		return 0;
 	}
 	Pixel pixel = (Pixel){.pixel = point, .color = color};
 	pixels->pixels[pixels->count] = pixel;
 	pixels->count++;
+	return 1;
 }

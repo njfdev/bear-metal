@@ -102,7 +102,8 @@ void clear_pixel_array(PixelList *pixels);
 * @param pixels - The PixelList
 * @param point - The Point to add
 * @param color - The Color of the Point
+* @return int - 1 on success, 0 on failure
 */
-void add_pixel_to_array(FrameBuffer *fb, PixelList *pixels, Point point, Color color);
+int add_pixel_to_array(FrameBuffer *fb, PixelList *pixels, Point point, Color color);
 
 #endif
