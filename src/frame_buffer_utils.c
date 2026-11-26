@@ -73,9 +73,6 @@ void draw_pixel_array(FrameBuffer *fb, PixelList *pixels) {
 }
 
 void clear_pixel_array(PixelList *pixels) {
-	for (int i = 0; i < pixels->count; i++) {
-		pixels->pixels[i] = (Pixel){0};
-	}
 	pixels->count = 0;
 }
 
