@@ -5,6 +5,7 @@
 
 typedef struct {
   FrameBuffer *fb;
+  PixelList *pixels;
   float dt;
 
   float bear_y;
@@ -15,8 +16,9 @@ typedef struct {
  * Runs the Bear Metal game. Never returns.
  *
  * @param fb pointer to previously initialized FrameBuffer
+ * @param pixels pointer to previously initialized PixelList
 */
-void gameloop(FrameBuffer *fb);
+void gameloop(FrameBuffer *fb, PixelList *pixels);
 
 /*
  * Tick the gameloop during the title phase.

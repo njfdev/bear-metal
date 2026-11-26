@@ -17,7 +17,7 @@ const uint32_t GROUND = 200;
 const float GRAVITY = -1150.0;
 const float JUMP_VELOCITY = 500.0;
 
-void gameloop(FrameBuffer *fb) {
+void gameloop(FrameBuffer *fb, PixelList *pixels) {
 
   int phase = 0;
   
@@ -25,7 +25,7 @@ void gameloop(FrameBuffer *fb) {
 
   clear_screen(fb, background);
 
-  gamestate_t state = {.fb = fb};
+  gamestate_t state = {.fb = fb, .pixels = pixels};
   reset_game_state(&state);
 
   uint32_t last_millis = millis();
@@ -91,7 +91,7 @@ void game_tick(gamestate_t *state) {
   uint32_t bottom = GROUND-state->bear_y;
 
 	Point corners[4] = {(Point){left, bottom}, (Point){right, bottom}, (Point){right, top}, (Point){left, top}};
-	fill_quad(state->fb, corners, RED, 0);
+	fill_quad(state->fb, state->pixels, corners, RED, 0);
 }
 
 void reset_game_state(gamestate_t *state) {
