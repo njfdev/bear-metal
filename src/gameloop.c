@@ -30,7 +30,10 @@ const uint32_t GROUND_THICKNESS = 2;
 
 const float GRAVITY = -2500.0;
 const float JUMP_VELOCITY = 700.0;
-const float RUN_VELOCITY = 350.0;
+
+const float START_RUN_VELOCITY = 250.0;
+const float MAX_RUN_VELOCITY = 1500.0;
+const float RUN_VELOCITY_INCREMENT_RATE = 25.0;
 
 void gameloop(FrameBuffer *fb) {
 	Color background = {0, 0, 0, 0};
@@ -88,10 +91,14 @@ void game_tick(gamestate_t *state) {
     state->next_obstacle_millis = millis()+(random_next(&state->rng_state)*(OBSTACLE_SPAWN_MAX_MILLIS-OBSTACLE_SPAWN_MIN_MILLIS))+OBSTACLE_SPAWN_MIN_MILLIS;
   }
 
+  // update bear speed
+  state->bear_velocity_x += RUN_VELOCITY_INCREMENT_RATE*state->dt;
+  if (state->bear_velocity_x > MAX_RUN_VELOCITY) state->bear_velocity_x = MAX_RUN_VELOCITY;
+
   // update game obstacles
   for (int i = 0; i < state->obstacles_count; i++) {
     obstacle_state_t* obs = state->obstacles[i];
-    obs->x -= RUN_VELOCITY*state->dt;
+    obs->x -= state->bear_velocity_x*state->dt;
 
     // if obstacle done, remove if and shift everything else down by 1
     if (obs->x < OBSTACLE_WIDTH/2.0) {
@@ -105,23 +112,23 @@ void game_tick(gamestate_t *state) {
   if (state->bear_y == 0) {
     // if jump, then give bear upwards velocity
     if (check_pressed(Up)) {
-      state->bear_velocity = JUMP_VELOCITY;
+      state->bear_velocity_y = JUMP_VELOCITY;
     }
   }
   if (check_pressed(Down)) {
     state->bear_height = BEAR_DUCKING_HEIGHT;
-    state->bear_velocity = BEAR_DUCKING_VELOCITY;
+    state->bear_velocity_y = BEAR_DUCKING_VELOCITY;
   } else {
     state->bear_height = BEAR_STANDING_HEIGHT;
   }
 
   // compute velocity change and offset
-  state->bear_velocity += GRAVITY*state->dt;
-  state->bear_y += state->bear_velocity*state->dt;
+  state->bear_velocity_y += GRAVITY*state->dt;
+  state->bear_y += state->bear_velocity_y*state->dt;
 
   if (state->bear_y <= 0) {
     state->bear_y = 0;
-    state->bear_velocity = 0;
+    state->bear_velocity_y = 0;
   }
 
   render_game(state);
@@ -142,7 +149,8 @@ void reset_game_state(gamestate_t *state) {
 
   state->bear_height = BEAR_STANDING_HEIGHT;
   state->bear_y = 0;
-  state->bear_velocity = 0;
+  state->bear_velocity_y = 0;
+  state->bear_velocity_x = START_RUN_VELOCITY;
 
   // free obstacles if already allocated
   state->next_obstacle_millis = millis();

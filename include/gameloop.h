@@ -29,7 +29,8 @@ typedef struct {
   float dt;
 
   float bear_y;
-  float bear_velocity;
+  float bear_velocity_y;
+  float bear_velocity_x;
   float bear_height;
   
   uint32_t next_obstacle_millis;
