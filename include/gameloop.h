@@ -28,6 +28,8 @@ typedef struct {
   random_state_t rng_state;
   float dt;
 
+  float score;
+
   float bear_y;
   float bear_velocity_y;
   float bear_velocity_x;

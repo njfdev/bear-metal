@@ -23,7 +23,7 @@ const uint32_t OBSTACLE_Y_INC = 35;
 const float BEE_RATIO = 0.5;
 
 const uint32_t OBSTACLE_SPAWN_MIN_MILLIS = 500;
-const uint32_t OBSTACLE_SPAWN_MAX_MILLIS = 1500;
+const uint32_t OBSTACLE_SPAWN_MAX_MILLIS = 1200;
 
 const uint32_t GROUND = 200;
 const uint32_t GROUND_THICKNESS = 2;
@@ -33,7 +33,7 @@ const float JUMP_VELOCITY = 700.0;
 
 const float START_RUN_VELOCITY = 250.0;
 const float MAX_RUN_VELOCITY = 1500.0;
-const float RUN_VELOCITY_INCREMENT_RATE = 25.0;
+const float RUN_VELOCITY_INCREMENT_RATE = 15.0;
 
 void gameloop(FrameBuffer *fb) {
 	Color background = {0, 0, 0, 0};
@@ -91,9 +91,10 @@ void game_tick(gamestate_t *state) {
     state->next_obstacle_millis = millis()+(random_next(&state->rng_state)*(OBSTACLE_SPAWN_MAX_MILLIS-OBSTACLE_SPAWN_MIN_MILLIS))+OBSTACLE_SPAWN_MIN_MILLIS;
   }
 
-  // update bear speed
+  // update bear speed and score
   state->bear_velocity_x += RUN_VELOCITY_INCREMENT_RATE*state->dt;
   if (state->bear_velocity_x > MAX_RUN_VELOCITY) state->bear_velocity_x = MAX_RUN_VELOCITY;
+  state->score += (state->bear_velocity_x*state->dt)/10.0;
 
   // update game obstacles
   for (int i = 0; i < state->obstacles_count; i++) {
@@ -140,10 +141,12 @@ void game_tick(gamestate_t *state) {
 }
 
 void endscreen_tick(gamestate_t *state) {
-  draw_text(state->fb, "Game Over!", (Point){220, 100}, WHITE, 2);
+  draw_text(state->fb, "Game Over!", (Point){220, 50}, WHITE, 2);
 }
 
 void reset_game_state(gamestate_t *state) {
+  state->score = 0;
+
   state->rng_state = (random_state_t) {.seed = millis()};
   state->dt = 1.0/LOOP_FREQUENCY;
 
@@ -231,6 +234,10 @@ void render_game(gamestate_t *state) {
 	Point corners[4] = {(Point){left, bottom}, (Point){right, bottom}, (Point){right, top}, (Point){left, top}};
 	fill_quad(state->fb, corners, RED, 0);
 
+  // render score
+  char score_string[19] = "Score: ";
+  uint_to_string(state->score, score_string+7, 11);
+  draw_text(state->fb, score_string, (Point){BEAR_X-(BEAR_WIDTH/2.0), GROUND+30}, WHITE, 1);
 }
 
 uint32_t obstacle_y(obstacle_type_t type) {
