@@ -15,15 +15,7 @@ uint32_t pack_color(Color color, FrameBuffer *fb) {
 }
 
 void put_pixel(FrameBuffer *fb, Point point, Color color) {
-	// ignore any pixels that are not on the screen
-	if ((point.x < 0 || point.x >= fb->width) || (point.y < 0 || point.y >= fb->height)) {
-		return;
-	}
-
-	// calculate the offset for this pixel
-	size_t offset = point.y * fb->pitch + point.x;
-	volatile uint32_t *pixel = (volatile uint32_t*)(fb->buffer + offset);
-	*pixel = pack_color(color, fb);
+	put_pixel_pre_packed(fb, point, pack_color(color));
 }
 
 void put_pixel_pre_packed(FrameBuffer *fb, Point point, uint32_t color) {
@@ -33,7 +25,7 @@ void put_pixel_pre_packed(FrameBuffer *fb, Point point, uint32_t color) {
 	}
 
 	// calculate the offset for this pixel
-	size_t offset = point.y * fb->pitch + point.x;
+	size_t offset = (size_t)point.y * fb->pitch + (size_t)point.x;
 	volatile uint32_t *pixel = (volatile uint32_t*)(fb->buffer + offset);
 	*pixel = color; // this is just a small optimization so that we don't have to always repeatedly pack the same color
 }
