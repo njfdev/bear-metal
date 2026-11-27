@@ -15,7 +15,7 @@ uint32_t pack_color(Color color, FrameBuffer *fb) {
 }
 
 void put_pixel(FrameBuffer *fb, Point point, Color color) {
-	put_pixel_pre_packed(fb, point, pack_color(color));
+	put_pixel_pre_packed(fb, point, pack_color(color, fb));
 }
 
 void put_pixel_pre_packed(FrameBuffer *fb, Point point, uint32_t color) {
@@ -46,7 +46,8 @@ void clear_screen(FrameBuffer *fb, Color color) {
 
 }
 
-void draw_pixel_array(FrameBuffer *fb, PixelList *pixels) {
+void draw_pixel_array_at(FrameBuffer *fb, DrawItem *item) {
+	PixelList *pixels = item->shape;
 	if (pixels->count == 0) {
 		return;
 	}
@@ -55,13 +56,26 @@ void draw_pixel_array(FrameBuffer *fb, PixelList *pixels) {
 	for (int i = 0; i < pixels->count; i++) {
 		Color color = pixels->pixels[i].color;
 		// check if the color is the same -- start with alpha since most likely to be different
+		Point shifted = (Point){pixels->pixels[i].pixel.x + item->origin.x, pixels->pixels[i].pixel.y + item->origin.y};
 		if (color.a == prev.a && color.r == prev.r && color.g == prev.g && color.b == prev.b) {
-			put_pixel_pre_packed(fb, pixels->pixels[i].pixel, packed_prev);
+			put_pixel_pre_packed(fb, shifted, packed_prev);
 		} else {
-			put_pixel(fb, pixels->pixels[i].pixel, color);
+			put_pixel(fb, shifted, color);
 			prev = color;
 			packed_prev = pack_color(prev, fb);
 		}
+	}
+}
+
+void draw_pixel_array(FrameBuffer *fb, PixelList *pixels) {
+	DrawItem item = (DrawItem){.shape = pixels, .origin = (Point){0, 0}};
+	draw_pixel_array_at(fb, &item); // just draw with origin at 0, 0
+}
+
+void draw_scene(FrameBuffer *fb, Color background, DrawItem *items, size_t count) {
+	clear_screen(fb, background);
+	for (int i = 0; i < count; i++) {
+		draw_pixel_array_at(fb, &(items[i]));
 	}
 }
 
