@@ -3,6 +3,7 @@
 
 #include "frame_buffer_utils.h"
 #include "random.h"
+#include "bitmap.h"
 
 typedef enum {
   Title,

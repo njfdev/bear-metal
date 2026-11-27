@@ -8,12 +8,13 @@
 #include "random.h"
 #include "timer.h"
 #include "alloc.h"
+#include "sprites.h"
 
 const uint32_t LOOP_FREQUENCY = 60;
 
 const uint32_t BEAR_X = 80;
-const uint32_t BEAR_WIDTH = 30;
-const uint32_t BEAR_STANDING_HEIGHT = 45;
+const uint32_t BEAR_WIDTH = 32;
+const uint32_t BEAR_STANDING_HEIGHT = 48;
 const uint32_t BEAR_DUCKING_HEIGHT = 25;
 const float BEAR_DUCKING_VELOCITY = -600;
 
@@ -36,7 +37,7 @@ const float MAX_RUN_VELOCITY = 1500.0;
 const float RUN_VELOCITY_INCREMENT_RATE = 15.0;
 
 void gameloop(FrameBuffer *fb) {
-	Color background = {0, 0, 0, 0};
+  Color background = {0, 0, 0, 255};
 
   clear_screen(fb, background);
 
@@ -76,7 +77,9 @@ void gameloop(FrameBuffer *fb) {
 }
 
 void title_tick(gamestate_t *state) {
-  draw_text(state->fb, "Press up arrow to start!", (Point){80, 300}, WHITE, 2);
+  Pixel start_text_pixels[2048];
+  PixelList start_text = {.pixels = start_text_pixels, .count = 0, .capacity = 2048};
+  draw_text(&start_text, "Press up arrow to start!", (Point){80, 300}, WHITE, 2);
   render_game(state);
 }
 
@@ -141,7 +144,7 @@ void game_tick(gamestate_t *state) {
 }
 
 void endscreen_tick(gamestate_t *state) {
-  draw_text(state->fb, "Game Over!", (Point){220, 50}, WHITE, 2);
+  draw_text(&((PixelList){}), "Game Over!", (Point){220, 50}, WHITE, 2);
 }
 
 void reset_game_state(gamestate_t *state) {
@@ -209,8 +212,14 @@ uint8_t check_collisions(gamestate_t *state) {
 }
 
 void render_game(gamestate_t *state) {
+  // define PixelLists for each element
+  Pixel floor_pixels[(GROUND + GROUND_THICKNESS) * state->fb->width];
+  Pixel bear_pixels[BEAR_WIDTH * BEAR_STANDING_HEIGHT];
+  PixelList floor = {.pixels = floor_pixels, .count = 0, .capacity = sizeof(floor_pixels) / sizeof(floor_pixels[0])};
+  PixelList bear = {.pixels = bear_pixels, .count = 0, .capacity = sizeof(bear_pixels) / sizeof(bear_pixels[0])};
+  
   // render floor
-  draw_line(state->fb, (Point){0, GROUND+GROUND_THICKNESS-1}, (Point){state->fb->width, GROUND+GROUND_THICKNESS-1}, WHITE, 0, GROUND_THICKNESS);
+  draw_line(&floor, (Point){0, GROUND+GROUND_THICKNESS-1}, (Point){state->fb->width, GROUND+GROUND_THICKNESS-1}, WHITE, 0, GROUND_THICKNESS);
 
   // render all obstacles
   for (int i = 0; i < state->obstacles_count; i++) {    
@@ -222,22 +231,17 @@ void render_game(gamestate_t *state) {
     uint32_t bottom = GROUND-obstacle_y(obs->type);
 
     Point corners[4] = {(Point){left, bottom}, (Point){right, bottom}, (Point){right, top}, (Point){left, top}};
-    fill_quad(state->fb, corners, WHITE, 0);
+    fill_quad(&floor, corners, WHITE, 0); // TODO: Create new pixellist
   }
 
-  // render bear
-  uint32_t left = BEAR_X-(BEAR_WIDTH/2);
-  uint32_t right = BEAR_X+(BEAR_WIDTH/2);
-  uint32_t top = GROUND-state->bear_height-state->bear_y;
-  uint32_t bottom = GROUND-state->bear_y;
-
-	Point corners[4] = {(Point){left, bottom}, (Point){right, bottom}, (Point){right, top}, (Point){left, top}};
-	fill_quad(state->fb, corners, RED, 0);
+  // TODO: Render bear
+  draw_bitmap(&bear, &BEAR_STANDING, (Point){25, 25}, WHITE, 1);
+  draw_scene(state->fb, BLACK, &((DrawItem){&bear, (Point){0, 0}}), 1);
 
   // render score
   char score_string[19] = "Score: ";
   uint_to_string(state->score, score_string+7, 11);
-  draw_text(state->fb, score_string, (Point){BEAR_X-(BEAR_WIDTH/2.0), GROUND+30}, WHITE, 1);
+  draw_text(&floor, score_string, (Point){BEAR_X-(BEAR_WIDTH/2.0), GROUND+30}, WHITE, 1); // TODO: Create new pixellist
 }
 
 uint32_t obstacle_y(obstacle_type_t type) {

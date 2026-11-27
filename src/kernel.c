@@ -39,9 +39,7 @@ void kernel_main(unsigned long magic, multiboot_info_t *info) {
 		.alpha_shift = 24
 	};
 
-	static Pixel line_store[16384];
-	PixelList pixels = {.pixels = line_store, .capacity = sizeof(line_store) / sizeof(line_store[0]), .count = 0};
-	gameloop(&fb, &pixels);
+	gameloop(&fb);
 
 	Color background = {20, 20, 20, 0};
 
@@ -62,6 +60,5 @@ void kernel_main(unsigned long magic, multiboot_info_t *info) {
 
 	int i = 0;
 	while (1) {
-		draw_pixel_array(&fb, &pixels);
 	}
 }
