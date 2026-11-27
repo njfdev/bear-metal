@@ -29,8 +29,8 @@ typedef struct {
 
 // simple struct to represent a coordinate
 typedef struct {
-	size_t x;
-	size_t y;
+	int32_t x;
+	int32_t y;
 } Point;
 
 typedef struct {

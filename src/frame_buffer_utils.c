@@ -16,7 +16,7 @@ uint32_t pack_color(Color color, FrameBuffer *fb) {
 
 void put_pixel(FrameBuffer *fb, Point point, Color color) {
 	// ignore any pixels that are not on the screen
-	if ((point.x < 0 || (uint32_t)point.x >= fb->width) || (point.y < 0 || (uint32_t)point.y >= fb->height)) {
+	if ((point.x < 0 || point.x >= fb->width) || (point.y < 0 || point.y >= fb->height)) {
 		return;
 	}
 
@@ -28,7 +28,7 @@ void put_pixel(FrameBuffer *fb, Point point, Color color) {
 
 void put_pixel_pre_packed(FrameBuffer *fb, Point point, uint32_t color) {
 	// ignore any pixels that are not on the screen
-	if ((point.x < 0 || (uint32_t)point.x >= fb->width) || (point.y < 0 || (uint32_t)point.y >= fb->height)) {
+	if ((point.x < 0 || point.x >= fb->width) || (point.y < 0 || point.y >= fb->height)) {
 		return;
 	}
 
@@ -46,7 +46,7 @@ void clear_screen(FrameBuffer *fb, Color color) {
 
 	// we don't need to call pack_color for every pixel since they're all the same
 	for (uint32_t y = 0; y < height; y++) {
-		volatile uint32_t *row_loc = (volatile uint32_t*)fb->buffer + ((size_t)y * fb->pitch);
+		volatile uint32_t *row_loc = (volatile uint32_t*)fb->buffer + (y * fb->pitch);
 		for (uint32_t x = 0; x < width; x++) {
 			row_loc[x] = packed_color;
 		}
@@ -55,6 +55,9 @@ void clear_screen(FrameBuffer *fb, Color color) {
 }
 
 void draw_pixel_array(FrameBuffer *fb, PixelList *pixels) {
+	if (pixels->count == 0) {
+		return;
+	}
 	Color prev = pixels->pixels[0].color;
 	uint32_t packed_prev = pack_color(prev, fb);
 	for (int i = 0; i < pixels->count; i++) {

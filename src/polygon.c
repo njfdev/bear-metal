@@ -107,4 +107,5 @@ int draw_polygon_vertices(PixelList *pixels, Point *vertices, int num_sides, Col
 			}
 		}
 	}
+	return 1;
 }
