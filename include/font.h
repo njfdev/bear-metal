@@ -2,6 +2,8 @@
 #define _FONT_H_
 
 #include <stdint.h>
+#include "frame_buffer_utils.h"
+#include "bitmap.h"
 
 // define some constants
 #define FONT_FIRST 32
@@ -298,6 +300,16 @@ static const uint8_t font[95][FONT_HEIGHT] = {
 	}
 };
 
-void draw_text(FrameBuffer *fb, char *text, Point loc, Color color, uint8_t scale);
+/*
+* A function to draw a string of text to the screen
+*
+* @param pixels - A pointer to a PixelList
+* @param text - A C-String of text to drawn
+* @param loc - The starting Point of the text (upper left corner of first char)
+* @param color - The Color of the text
+* @param scale - The scale of the text (default is 8x16px)
+* @return int - 1 on success, 0 on failure
+*/
+int draw_text(PixelList *pixels, char *text, Point loc, Color color, uint8_t scale);
 
 #endif

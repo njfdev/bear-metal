@@ -1,11 +1,11 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include "frame_buffer_utils.h"
-#include "bitmap.h"
 #include "font.h"
 
-void draw_text(FrameBuffer *fb, char *text, Point loc, Color color, uint8_t scale) {
+int draw_text(PixelList *pixels, char *text, Point loc, Color color, uint8_t scale) {
+	int pixel_count = pixels->count;
+	
 	size_t original_x = loc.x;	
 	for (char *p = text; *p != '\0'; p++) {
 		char ch = *p;
@@ -21,9 +21,13 @@ void draw_text(FrameBuffer *fb, char *text, Point loc, Color color, uint8_t scal
 		}
 
 		Bitmap glyph = {.data = font[ch - FONT_FIRST], .width = FONT_WIDTH, .height = FONT_HEIGHT, .stride = 1};
-		draw_bitmap(fb, &glyph, loc, color, scale);
+		if (!draw_bitmap(pixels, &glyph, loc, color, scale)) {
+			pixels->count = pixel_count;
+			return 0;
+		}
 		
 		// update position by adding FONT_WIDTH and 2px padding
 		loc.x += (FONT_WIDTH + 2) * scale;		
 	}
+	return 1;
 }
