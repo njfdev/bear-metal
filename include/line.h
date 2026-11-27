@@ -6,13 +6,13 @@
 /*
 * A function to draw a 1px wide line with no antialiasing
 *
-* @param fb - A pointer to the frame buffer to draw on
 * @param pixels - A PixelList to keep track of pixels that need to be drawn
 * @param start - A Point representing the starting point of the line
 * @param end - A Point representing the end point of the line
 * @param color - The Color to draw the line
+* @param int - 1 on success, 0 on failure
 */
-static void draw_line_no_thickness(FrameBuffer *fb, PixelList *pixels, Point start, Point end, Color color);
+static int draw_line_bresenham(PixelList *pixels, Point start, Point end, Color color);
 
 /*
 * A function to find the four corners of a quadrilateral representing a line with thickness > 1
@@ -27,25 +27,25 @@ static void find_quad_corners(Point start, Point end, int thickness, Point corne
 /*
 * A helper function to draw a 1 thickness antialiased line
 *
-* @param fb - A pointer to the frame buffer
 * @param pixels - A PixelList to keep track of pixels that need to be drawn
 * @param start - The start Point of the line
 * @param end - The end Point of the line
 * @param color - The Color of the line
+* @return int - 1 on success, 0 on failure
 */
-static void draw_line_xiaolin(FrameBuffer *fb, PixelList *pixels, Point start, Point end, Color color);
+static int draw_line_xiaolin(PixelList *pixels, Point start, Point end, Color color);
 
 /*
 * A function to draw a line on the provided frame buffer
 *
-* @param fb - A pointer to the frame buffer to draw on
 * @param pixels - A PixelList to keep track of pixels that need to be drawn
 * @param start - A Point representing the starting point of the line
 * @param end - A Point representing the end point of the line
 * @param color - The Color to draw the line
 * @param antialiasing - Whether or not to antialias the line
 * @param thickness - The thickness of the line (in px)
+* @return int - 1 on success, 0 on failure
 */
-void draw_line(FrameBuffer *fb, PixelList *pixels, Point start, Point end, Color color, int antialiasing, int thickness);
+int draw_line(PixelList *pixels, Point start, Point end, Color color, int antialiasing, int thickness);
 
 #endif

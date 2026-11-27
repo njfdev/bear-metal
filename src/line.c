@@ -5,7 +5,7 @@
 #include "general_utils.h"
 #include "quad.h"
 
-static void draw_line_no_thickness(FrameBuffer *fb, PixelList *pixels, Point start, Point end, Color color) {
+static int draw_line_bresenham(PixelList *pixels, Point start, Point end, Color color) {
 	int x = (int)start.x;
 	int y = (int)start.y;
 	int dx = (int)(end.x - start.x);
@@ -16,8 +16,12 @@ static void draw_line_no_thickness(FrameBuffer *fb, PixelList *pixels, Point sta
 	dy = abs(dy);
 	int error = dx - dy;
 	
+	int pixel_count = pixels->count;
 	while (1) {
-		add_pixel_to_array(fb, pixels, (Point){x, y}, color);
+		if (!add_pixel_to_array(pixels, (Point){x, y}, color)) {
+			pixels->count = pixel_count;
+			return 0;
+		}
 
 		if (x == end.x && y == end.y) {
 			break;
@@ -35,6 +39,7 @@ static void draw_line_no_thickness(FrameBuffer *fb, PixelList *pixels, Point sta
 			error += dx;
 		}
 	}
+	return 1;
 }
 
 static void find_quad_corners(Point start, Point end, int thickness, Point corners[4]) {	
@@ -84,13 +89,15 @@ static void find_quad_corners(Point start, Point end, int thickness, Point corne
 	corners[3] = (Point){x3, y3};
 }
 
-static void draw_line_xiaolin(FrameBuffer *fb, PixelList *pixels, Point start, Point end, Color color) {
+static int draw_line_xiaolin(PixelList *pixels, Point start, Point end, Color color) {
 	// TODO: Implement an alpha channel
 	int x0 = start.x;
 	int y0 = start.y;
 	int x1 = end.x;
 	int y1 = end.y;
 	int steep = abs(y1 - y0) > abs(x1 - x0);
+	
+	int pixel_count = pixels->count;
 
 	if (steep) {
 		// swap so we can step along x-axis still
@@ -135,33 +142,40 @@ static void draw_line_xiaolin(FrameBuffer *fb, PixelList *pixels, Point start, P
 		
 		if (first.a > 0) {
 			Point pixel = steep ? (Point){y, x} : (Point){x, y}; // swap back if needed
-			add_pixel_to_array(fb, pixels, pixel, color);
+			if (!add_pixel_to_array(pixels, pixel, color)) {
+				pixels->count = pixel_count;
+				return 0;
+			}
 		}
 		if (second.a > 0) {
 			Point pixel = steep ? (Point){y, x} : (Point){x, y};	
-			add_pixel_to_array(fb, pixels, pixel, color);
+			if (!add_pixel_to_array(pixels, pixel, color)) {
+				pixels->count = pixel_count;
+				return 0;
+			}
 		}
 	}
+	return 1;
 }
 
-void draw_line(FrameBuffer *fb, PixelList *pixels, Point start, Point end, Color color, int antialiasing, int thickness) {
+int draw_line(PixelList *pixels, Point start, Point end, Color color, int antialiasing, int thickness) {
 	if (antialiasing) {
 		// we are using xiaolin
 		if (thickness > 1) {
 			Point corners[4]; 
 			find_quad_corners(start, end, thickness, corners);
-			fill_quad(fb, pixels, corners, color, 1);
+			return fill_quad(pixels, corners, color, 1);
 		} else {
-			draw_line_xiaolin(fb, pixels, start, end, color);
+			return draw_line_xiaolin(pixels, start, end, color);
 		}
 	} else {
 		// in this case we want to use bresenham's
 		if (thickness > 1) {
 			Point corners[4]; 
 			find_quad_corners(start, end, thickness, corners);
-			fill_quad(fb, pixels, corners, color, 0);
+			return fill_quad(pixels, corners, color, 0);
 		} else {
-			draw_line_no_thickness(fb, pixels, start, end, color);
+			return draw_line_bresenham(pixels, start, end, color);
 		}
 	}
 }
