@@ -44,6 +44,11 @@ typedef struct {
 	size_t count;
 } PixelList;
 
+typedef struct {
+	PixelList *shape;
+	Point origin;
+} DrawItem;
+
 /*
 * A function to take a Color struct and pack it into a uint32_t
 * 
@@ -87,6 +92,24 @@ void clear_screen(FrameBuffer *fb, Color color);
 * @param num_pixels - The length of the pixels list
 */
 void draw_pixel_array(FrameBuffer *fb, PixelList *pixels);
+
+/*
+* A function to draw a PixelList with the origin shifted
+*
+* @param fb - A pointer to the frame buffer
+* @param item - A pointer to a DrawItem (PixelList + origin Point)
+*/
+void draw_pixel_array_at(FrameBuffer *fb, DrawItem *item);
+
+/*
+* A function to draw an entire scene to the screen
+*
+* @param fb - A pointer to the frame buffer
+* @param background - The background Color
+* @param items - A pointer to the list of DrawItems to draw
+* @param count - The number of items to be drawn
+*/
+void draw_scene(FrameBuffer *fb, Color background, DrawItem *items, size_t count);
 
 /*
 * A helper function to clear a PixelList
