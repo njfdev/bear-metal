@@ -98,12 +98,11 @@ void clear_pixel_array(PixelList *pixels);
 /*
 * A helper function to add a pixel to a PixelList
 * 
-* @param fb - A pointer to the frame buffer
 * @param pixels - The PixelList
 * @param point - The Point to add
 * @param color - The Color of the Point
 * @return int - 1 on success, 0 on failure
 */
-int add_pixel_to_array(FrameBuffer *fb, PixelList *pixels, Point point, Color color);
+int add_pixel_to_array(PixelList *pixels, Point point, Color color);
 
 #endif

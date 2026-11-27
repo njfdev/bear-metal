@@ -76,7 +76,7 @@ void clear_pixel_array(PixelList *pixels) {
 	pixels->count = 0;
 }
 
-int add_pixel_to_array(FrameBuffer *fb, PixelList *pixels, Point point, Color color) {
+int add_pixel_to_array(PixelList *pixels, Point point, Color color) {
 	if (pixels->count == pixels->capacity) {
 		return 0;
 	}
