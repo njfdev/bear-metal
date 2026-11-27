@@ -1,11 +1,7 @@
 #include "polygon.h"
-#include "line.h"
-#include "quad.h"
-#include "frame_buffer_utils.h"
-#include "general_utils.h"
 
-void draw_polygon_center(FrameBuffer *fb, Point center, int num_sides, int circumradius, Color color, int thickness, int fill, int antialiasing) {
-	// TODO: Fix xiaolin and fix thicker lines not being rendered entirely correctly
+int draw_polygon_center(PixelList *pixels, Point center, int num_sides, int circumradius, Color color, int thickness, int fill, int antialiasing) {
+	// TODO: Fix thicker lines not being drawn correctly at vertices
 	// we just need to calculate each point and then draw lines between them
 	Point vertices[num_sides];
 	float angle_mult = (4.0f * HALF_PI) / num_sides;
@@ -15,16 +11,20 @@ void draw_polygon_center(FrameBuffer *fb, Point center, int num_sides, int circu
 		int x = (int)(sin(angle + HALF_PI) * circumradius + center.x);
 		vertices[i - 1] = (Point){x, y};
 	}	
-	draw_polygon_vertices(fb, vertices, num_sides, color, thickness, fill, antialiasing);
+	return draw_polygon_vertices(pixels, vertices, num_sides, color, thickness, fill, antialiasing);
 }
 
-void draw_polygon_vertices(FrameBuffer *fb, Point *vertices, int num_sides, Color color, int thickness, int fill, int antialiasing) {
+int draw_polygon_vertices(PixelList *pixels, Point *vertices, int num_sides, Color color, int thickness, int fill, int antialiasing) {
+	int pixel_count = pixels->count;
+
 	for (int i = 0; i < num_sides; i++) {
-		draw_line(fb, vertices[i], vertices [(i + 1) % num_sides], color, antialiasing, thickness);
+		if (!draw_line(pixels, vertices[i], vertices [(i + 1) % num_sides], color, antialiasing, thickness)) {
+			pixels->count = pixel_count;
+			return 0;
+		}
 	}
 
 	if (fill) {	
-		uint32_t packed_color = pack_color(color, fb);		
 		ScanEdge edges[num_sides];
 		int edge_count = 0;
 		float top_y = vertices[0].y;
@@ -83,16 +83,29 @@ void draw_polygon_vertices(FrameBuffer *fb, Point *vertices, int num_sides, Colo
 				if (antialiasing && x == (int)left) {
 					// x <= left so we just change opacity of this pixel
 					int alpha = (int)(color.a * (1 - (left - x)));
-					put_pixel(fb, (Point){x, y}, (Color){color.r, color.g, color.b, alpha});
+					if (!add_pixel_to_array(pixels, (Point){x, y}, (Color){color.r, color.g, color.b, alpha})) {
+						pixels->count = pixel_count;
+						return 0;
+					}
 				} else if (antialiasing && x >= (right - 1)) {
 					// we need to color this pixel and possibly the pixel after it
-					put_pixel_pre_packed(fb, (Point){x, y}, packed_color);
+					if (!add_pixel_to_array(pixels, (Point){x, y}, color)) {
+						pixels->count = pixel_count;
+						return 0;
+					}
 					int alpha = (int)(color.a * (right - x));
-					put_pixel(fb, (Point){x + 1, y}, (Color){color.r, color.g, color.b, alpha});
+					if (!add_pixel_to_array(pixels, (Point){x + 1, y}, (Color){color.r, color.g, color.b, alpha})) {
+						pixels->count = pixel_count;
+						return 0;
+					}
 				} else {
-					put_pixel_pre_packed(fb, (Point){x, y}, packed_color);
+					if (!add_pixel_to_array(pixels, (Point){x, y}, color)) {
+						pixels->count = pixel_count;
+						return 0;
+					}
 				}
 			}
 		}
 	}
+	return 1;
 }

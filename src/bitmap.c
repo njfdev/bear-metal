@@ -1,13 +1,8 @@
-#include <stddef.h>
-#include <stdint.h>
 #include "bitmap.h"
 
-void draw_bitmap(FrameBuffer *fb, Bitmap *bitmap, Point loc, Color color, uint8_t scale) {
-	if (!fb || !bitmap || !bitmap->data || scale <= 0) {
-		return;
-	}
+int draw_bitmap(PixelList *pixels, Bitmap *bitmap, Point loc, Color color, uint8_t scale) {
+	int pixel_count = pixels->count;
 
-	uint32_t packed_color = pack_color(color, fb); // prepack since it's the same for all pixels
 	for (uint32_t row = 0; row < bitmap->height; row++) {
 		for (uint32_t col = 0; col < bitmap->width; col++) {
 			uint32_t byte_index = row * bitmap->stride + (col / 8u); // calculate the index rq
@@ -16,18 +11,22 @@ void draw_bitmap(FrameBuffer *fb, Bitmap *bitmap, Point loc, Color color, uint8_
 				continue; // skip if we don't draw anything on this pixel
 			}
 
-			uint64_t start_x = (uint64_t)(loc.x + scale * col);
-			uint64_t start_y = (uint64_t)(loc.y + scale * row);
+			int64_t start_x = (int64_t)(loc.x + scale * col);
+			int64_t start_y = (int64_t)(loc.y + scale * row);
 			
 			// each pixel becomes a scale by scale square
 			for (uint32_t dy = 0; dy < scale; dy++) {
 				for (uint32_t dx = 0; dx < scale; dx++) {
-					uint64_t x = start_x + dx;
-					uint64_t y = start_y + dy;
+					int64_t x = start_x + dx;
+					int64_t y = start_y + dy;
 					
-					put_pixel_pre_packed(fb, (Point){x, y}, packed_color);
+					if (!add_pixel_to_array(pixels, (Point){x, y}, color)) {
+						pixels->count = pixel_count;
+						return 0;
+					}
 				}
 			}
 		}
 	}	
+	return 1;
 }

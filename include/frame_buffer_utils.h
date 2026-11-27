@@ -29,9 +29,25 @@ typedef struct {
 
 // simple struct to represent a coordinate
 typedef struct {
-	size_t x;
-	size_t y;
+	int32_t x;
+	int32_t y;
 } Point;
+
+typedef struct {
+	Point pixel;
+	Color color;
+} Pixel;
+
+typedef struct {
+	Pixel *pixels;
+	size_t capacity;
+	size_t count;
+} PixelList;
+
+typedef struct {
+	PixelList *shape;
+	Point origin;
+} DrawItem;
 
 /*
 * A function to take a Color struct and pack it into a uint32_t
@@ -67,5 +83,49 @@ void put_pixel_pre_packed(FrameBuffer *fb, Point point, uint32_t color);
 * @param color - A Color representing the color to fill the screen with
 */
 void clear_screen(FrameBuffer *fb, Color color);
+
+/*
+* A function to draw a provided list of pixels to the screen
+* 
+* @param fb - A pointer to the frame buffer
+* @param pixels - A list of Pixels
+* @param num_pixels - The length of the pixels list
+*/
+void draw_pixel_array(FrameBuffer *fb, PixelList *pixels);
+
+/*
+* A function to draw a PixelList with the origin shifted
+*
+* @param fb - A pointer to the frame buffer
+* @param item - A pointer to a DrawItem (PixelList + origin Point)
+*/
+void draw_pixel_array_at(FrameBuffer *fb, DrawItem *item);
+
+/*
+* A function to draw an entire scene to the screen
+*
+* @param fb - A pointer to the frame buffer
+* @param background - The background Color
+* @param items - A pointer to the list of DrawItems to draw
+* @param count - The number of items to be drawn
+*/
+void draw_scene(FrameBuffer *fb, Color background, DrawItem *items, size_t count);
+
+/*
+* A helper function to clear a PixelList
+* 
+* @param pixels - The PixelList to clear
+*/
+void clear_pixel_array(PixelList *pixels);
+
+/*
+* A helper function to add a pixel to a PixelList
+* 
+* @param pixels - The PixelList
+* @param point - The Point to add
+* @param color - The Color of the Point
+* @return int - 1 on success, 0 on failure
+*/
+int add_pixel_to_array(PixelList *pixels, Point point, Color color);
 
 #endif
