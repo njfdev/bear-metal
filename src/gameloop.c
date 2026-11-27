@@ -60,7 +60,7 @@ void gameloop(FrameBuffer *fb, PixelList *pixels) {
 }
 
 void title_tick(gamestate_t *state) {
-  draw_text(state->fb, "Press up arrow to start!", (Point){80, 210}, WHITE, 2);
+  draw_text(state->pixels, "Press up arrow to start!", (Point){80, 210}, WHITE, 2);
 
 }
 
@@ -83,7 +83,7 @@ void game_tick(gamestate_t *state) {
   }
 
   // draw everything
-  draw_text(state->fb, "Running!", (Point){20, GROUND+40}, WHITE, 1);
+  draw_text(state->pixels, "Running!", (Point){20, GROUND+40}, WHITE, 1);
 
   uint32_t left = BEAR_X-(BEAR_WIDTH/2);
   uint32_t right = BEAR_X+(BEAR_WIDTH/2);
@@ -91,7 +91,7 @@ void game_tick(gamestate_t *state) {
   uint32_t bottom = GROUND-state->bear_y;
 
 	Point corners[4] = {(Point){left, bottom}, (Point){right, bottom}, (Point){right, top}, (Point){left, top}};
-	fill_quad(state->fb, state->pixels, corners, RED, 0);
+	fill_quad(state->pixels, corners, RED, 0);
 }
 
 void reset_game_state(gamestate_t *state) {
