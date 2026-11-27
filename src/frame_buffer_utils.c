@@ -1,5 +1,3 @@
-#include <stddef.h>
-#include <stdint.h>
 #include "frame_buffer_utils.h"
 
 uint32_t pack_color(Color color, FrameBuffer *fb) {

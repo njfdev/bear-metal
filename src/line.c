@@ -1,9 +1,4 @@
-#include <stdint.h>
-#include <stddef.h>
-#include "frame_buffer_utils.h"
 #include "line.h"
-#include "general_utils.h"
-#include "quad.h"
 
 static int draw_line_bresenham(PixelList *pixels, Point start, Point end, Color color) {
 	int x = (int)start.x;

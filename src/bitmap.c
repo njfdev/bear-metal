@@ -1,5 +1,3 @@
-#include <stddef.h>
-#include <stdint.h>
 #include "bitmap.h"
 
 int draw_bitmap(PixelList *pixels, Bitmap *bitmap, Point loc, Color color, uint8_t scale) {

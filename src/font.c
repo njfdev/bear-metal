@@ -1,6 +1,3 @@
-#include <stdint.h>
-#include <stddef.h>
-
 #include "font.h"
 
 int draw_text(PixelList *pixels, char *text, Point loc, Color color, uint8_t scale) {

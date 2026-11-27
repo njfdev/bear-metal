@@ -2,6 +2,7 @@
 #define _BITMAP_H_
 
 #include <stdint.h>
+#include <stddef.h>
 #include "frame_buffer_utils.h"
 
 typedef struct {

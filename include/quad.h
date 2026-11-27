@@ -1,6 +1,8 @@
 #ifndef _QUAD_H_
 #define _QUAD_H_
 
+#include <stdint.h>
+#include <stddef.h>
 #include "frame_buffer_utils.h"
 #include "general_utils.h"
 

@@ -1,7 +1,11 @@
 #ifndef _LINE_H_
 #define _LINE_H_
 
-#include "frame_buffer_utils.h" 
+#include <stdint.h>
+#include <stddef.h>
+#include "frame_buffer_utils.h"
+#include "general_utils.h"
+#include "quad.h"
 
 /*
 * A function to draw a 1px wide line with no antialiasing

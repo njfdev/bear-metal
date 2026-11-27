@@ -1,5 +1,3 @@
-#include <stdint.h>
-#include <stddef.h>
 #include "quad.h"
 
 int fill_quad(PixelList *pixels, Point corners[4], Color color, int antialiasing) {	
