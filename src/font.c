@@ -3,7 +3,7 @@
 int draw_text(PixelList *pixels, char *text, Point loc, Color color, uint8_t scale) {
 	int pixel_count = pixels->count;
 	
-	size_t original_x = loc.x;	
+	int32_t original_x = loc.x;	
 	for (char *p = text; *p != '\0'; p++) {
 		char ch = *p;
 		if (ch == '\n') {

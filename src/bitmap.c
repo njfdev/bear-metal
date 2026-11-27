@@ -11,14 +11,14 @@ int draw_bitmap(PixelList *pixels, Bitmap *bitmap, Point loc, Color color, uint8
 				continue; // skip if we don't draw anything on this pixel
 			}
 
-			uint64_t start_x = (uint64_t)(loc.x + scale * col);
-			uint64_t start_y = (uint64_t)(loc.y + scale * row);
+			int64_t start_x = (int64_t)(loc.x + scale * col);
+			int64_t start_y = (int64_t)(loc.y + scale * row);
 			
 			// each pixel becomes a scale by scale square
 			for (uint32_t dy = 0; dy < scale; dy++) {
 				for (uint32_t dx = 0; dx < scale; dx++) {
-					uint64_t x = start_x + dx;
-					uint64_t y = start_y + dy;
+					int64_t x = start_x + dx;
+					int64_t y = start_y + dy;
 					
 					if (!add_pixel_to_array(pixels, (Point){x, y}, color)) {
 						pixels->count = pixel_count;
