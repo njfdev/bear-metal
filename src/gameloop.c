@@ -14,7 +14,7 @@ const uint32_t LOOP_FREQUENCY = 60;
 
 enum {BEAR_X = 80, BEAR_WIDTH = 32, BEAR_STANDING_HEIGHT = 48, BEAR_DUCKING_HEIGHT = 25, BEAR_DUCKING_VELOCITY = -600};
 
-enum {OBSTACLE_WIDTH = 30, OBSTACLE_HEIGHT = 30, OBSTACLE_Y_INC = 35, BEE_RATIO = 1}; // TODO: look at how bee ratio is implemented since it must be an int
+enum {OBSTACLE_WIDTH = 30, OBSTACLE_HEIGHT = 30, OBSTACLE_Y_INC = 35, BEE_RATIO = 1};
 
 enum {OBSTACLE_SPAWN_MIN_MILLIS = 500, OBSTACLE_SPAWN_MAX_MILLIS = 1200};
 
@@ -38,12 +38,10 @@ void gameloop(FrameBuffer *fb) {
       clear_screen(fb, background);
     }
 
-    if (state.phase == Title) {
-      title_tick(&state);
-    } else if (state.phase == Game) {
+    if (state.phase == Game) {
       game_tick(&state);
     } else {
-      endscreen_tick(&state);
+      render_game(&state);
     }
 
     if (check_pressed(Enter) && state.phase != Title) {
@@ -64,16 +62,13 @@ void gameloop(FrameBuffer *fb) {
   }
 }
 
-void title_tick(gamestate_t *state) {
-  render_game(state);
-}
-
 void game_tick(gamestate_t *state) {
   // generate obstacle if necessary
   if (state->next_obstacle_millis < millis()) {
     float type_rng = random_next(&state->rng_state);
+    float true_bee_ratio = BEE_RATIO / 2.0; // we store as int so it can go in enum, so scale down here
     add_obstacle(state, (obstacle_state_t) {
-      .type = type_rng > BEE_RATIO ? Hive : type_rng > BEE_RATIO/2.0 ? Bee : HighBee,
+      .type = type_rng > true_bee_ratio ? Hive : type_rng > true_bee_ratio/2.0 ? Bee : HighBee,
       .x = state->fb->width-OBSTACLE_WIDTH
     });
     state->next_obstacle_millis = millis()+(random_next(&state->rng_state)*(OBSTACLE_SPAWN_MAX_MILLIS-OBSTACLE_SPAWN_MIN_MILLIS))+OBSTACLE_SPAWN_MIN_MILLIS;
@@ -120,16 +115,12 @@ void game_tick(gamestate_t *state) {
     state->bear_velocity_y = 0;
   }
 
-  render_game(state);
-
   // if collision, set for return
   if (check_collisions(state) == 1) {
     state->phase = EndScreen;
   }
-}
 
-void endscreen_tick(gamestate_t *state) {
-  draw_text(&((PixelList){}), "Game Over!", (Point){220, 50}, WHITE, 2);
+  render_game(state);
 }
 
 void reset_game_state(gamestate_t *state) {
@@ -226,10 +217,14 @@ void render_game(gamestate_t *state) {
   PixelList message_text = {.pixels = message_text_pixels, .count = 0, .capacity = 4096};
   if (state->phase == Title) {  
     draw_text(&message_text, "Press up arrow to start!", (Point){80, 300}, WHITE, 2);
-    items[3] = (DrawItem){.shape = &message_text, .origin = (Point){0, 0}};
+  } if (state->phase == EndScreen) {	
+    draw_text(&message_text, "Game Over!", (Point){80, 300}, WHITE, 2);
   }
+  items[3] = (DrawItem){.shape = &message_text, .origin = (Point){0, 0}};
 
   // render all obstacles
+  static Pixel obstacle_pixels[OBSTACLE_WIDTH * OBSTACLE_HEIGHT];
+  PixelList obstacle = (PixelList){.shape = obstacle_pixels, .origin = (Point){0, 0}};
   for (int i = 0; i < state->obstacles_count; i++) {    
     obstacle_state_t* obs = state->obstacles[i];
 
