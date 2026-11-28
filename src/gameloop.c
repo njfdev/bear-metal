@@ -77,9 +77,6 @@ void gameloop(FrameBuffer *fb) {
 }
 
 void title_tick(gamestate_t *state) {
-  Pixel start_text_pixels[2048];
-  PixelList start_text = {.pixels = start_text_pixels, .count = 0, .capacity = 2048};
-  draw_text(&start_text, "Press up arrow to start!", (Point){80, 300}, WHITE, 2);
   render_game(state);
 }
 
@@ -213,13 +210,36 @@ uint8_t check_collisions(gamestate_t *state) {
 
 void render_game(gamestate_t *state) {
   // define PixelLists for each element
+  int item_count = 4 + state->obstacles_count; // 4 items always plus the obstacles
   Pixel floor_pixels[(GROUND + GROUND_THICKNESS) * state->fb->width];
   Pixel bear_pixels[BEAR_WIDTH * BEAR_STANDING_HEIGHT];
   PixelList floor = {.pixels = floor_pixels, .count = 0, .capacity = sizeof(floor_pixels) / sizeof(floor_pixels[0])};
   PixelList bear = {.pixels = bear_pixels, .count = 0, .capacity = sizeof(bear_pixels) / sizeof(bear_pixels[0])};
-  
+  DrawItem items[item_count];
+
   // render floor
   draw_line(&floor, (Point){0, GROUND+GROUND_THICKNESS-1}, (Point){state->fb->width, GROUND+GROUND_THICKNESS-1}, WHITE, 0, GROUND_THICKNESS);
+  items[0] = (DrawItem){.shape = &floor, .origin = (Point){0, 0}};
+
+  // render bear
+  draw_bitmap(&bear, &BEAR_STANDING, (Point){BEAR_X, GROUND + GROUND_THICKNESS}, WHITE, 1);
+  items[1] = (DrawItem){.shape = &bear, .origin = (Point){0, 0}};  
+
+  // render score
+  char score_string[19] = "Score: ";
+  uint_to_string(state->score, score_string+7, 11);
+  Pixel score_pixels[FONT_HEIGHT * FONT_WIDTH * 19];
+  PixelList score = {.pixels = score_pixels, .count = 0, .capacity = sizeof(score_pixels) / sizeof(score_pixels[0])};
+  draw_text(&score, score_string, (Point){BEAR_X-(BEAR_WIDTH/2.0), GROUND+30}, WHITE, 1);
+  items[2] = (DrawItem){.shape = &score, .origin = (Point){0, 0}};  
+
+  // render phase specific text
+  if (state->phase == Title) {  
+    Pixel start_text_pixels[FONT_WIDTH * FONT_HEIGHT * 24 * 16];
+    PixelList start_text = {.pixels = start_text_pixels, .count = 0, .capacity = 2048};
+    draw_text(&start_text, "Press up arrow to start!", (Point){80, 300}, WHITE, 2);
+    items[3] = (DrawItem){.shape = &start_text, .origin = (Point){0, 0}};
+  }
 
   // render all obstacles
   for (int i = 0; i < state->obstacles_count; i++) {    
@@ -234,14 +254,8 @@ void render_game(gamestate_t *state) {
     fill_quad(&floor, corners, WHITE, 0); // TODO: Create new pixellist
   }
 
-  // TODO: Render bear
-  draw_bitmap(&bear, &BEAR_STANDING, (Point){25, 25}, WHITE, 1);
-  draw_scene(state->fb, BLACK, &((DrawItem){&bear, (Point){0, 0}}), 1);
-
-  // render score
-  char score_string[19] = "Score: ";
-  uint_to_string(state->score, score_string+7, 11);
-  draw_text(&floor, score_string, (Point){BEAR_X-(BEAR_WIDTH/2.0), GROUND+30}, WHITE, 1); // TODO: Create new pixellist
+  // now render the whole scene
+  draw_scene(state->fb, BLACK, items, item_count);
 }
 
 uint32_t obstacle_y(obstacle_type_t type) {
