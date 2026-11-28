@@ -12,32 +12,20 @@
 
 const uint32_t LOOP_FREQUENCY = 60;
 
-const uint32_t BEAR_X = 80;
-const uint32_t BEAR_WIDTH = 32;
-const uint32_t BEAR_STANDING_HEIGHT = 48;
-const uint32_t BEAR_DUCKING_HEIGHT = 25;
-const float BEAR_DUCKING_VELOCITY = -600;
+enum {BEAR_X = 80, BEAR_WIDTH = 32, BEAR_STANDING_HEIGHT = 48, BEAR_DUCKING_HEIGHT = 25, BEAR_DUCKING_VELOCITY = -600};
 
-const uint32_t OBSTACLE_WIDTH = 30;
-const uint32_t OBSTACLE_HEIGHT = 30;
-const uint32_t OBSTACLE_Y_INC = 35;
-const float BEE_RATIO = 0.5;
+enum {OBSTACLE_WIDTH = 30, OBSTACLE_HEIGHT = 30, OBSTACLE_Y_INC = 35, BEE_RATIO = 1}; // TODO: look at how bee ratio is implemented since it must be an int
 
-const uint32_t OBSTACLE_SPAWN_MIN_MILLIS = 500;
-const uint32_t OBSTACLE_SPAWN_MAX_MILLIS = 1200;
+enum {OBSTACLE_SPAWN_MIN_MILLIS = 500, OBSTACLE_SPAWN_MAX_MILLIS = 1200};
 
-const uint32_t GROUND = 200;
-const uint32_t GROUND_THICKNESS = 2;
+enum {GROUND_Y = 200, GROUND_THICKNESS = 2, SCREEN_W = 640, SCREEN_H = 480};
 
-const float GRAVITY = -2500.0;
-const float JUMP_VELOCITY = 700.0;
+enum {GRAVITY = -2500, JUMP_VELOCITY = 700};
 
-const float START_RUN_VELOCITY = 250.0;
-const float MAX_RUN_VELOCITY = 1500.0;
-const float RUN_VELOCITY_INCREMENT_RATE = 15.0;
+enum {START_RUN_VELOCITY = 250, MAX_RUN_VELOCITY = 1500, RUN_VELOCITY_INCREMENT_RATE = 15};
 
 void gameloop(FrameBuffer *fb) {
-  Color background = {0, 0, 0, 255};
+  Color background = BLACK;
 
   clear_screen(fb, background);
 
@@ -211,34 +199,34 @@ uint8_t check_collisions(gamestate_t *state) {
 void render_game(gamestate_t *state) {
   // define PixelLists for each element
   int item_count = 4 + state->obstacles_count; // 4 items always plus the obstacles
-  Pixel floor_pixels[(GROUND + GROUND_THICKNESS) * state->fb->width];
-  Pixel bear_pixels[BEAR_WIDTH * BEAR_STANDING_HEIGHT];
+  static Pixel floor_pixels[GROUND_THICKNESS * SCREEN_W];
+  static Pixel bear_pixels[BEAR_WIDTH * BEAR_STANDING_HEIGHT];
   PixelList floor = {.pixels = floor_pixels, .count = 0, .capacity = sizeof(floor_pixels) / sizeof(floor_pixels[0])};
   PixelList bear = {.pixels = bear_pixels, .count = 0, .capacity = sizeof(bear_pixels) / sizeof(bear_pixels[0])};
   DrawItem items[item_count];
 
   // render floor
-  draw_line(&floor, (Point){0, GROUND+GROUND_THICKNESS-1}, (Point){state->fb->width, GROUND+GROUND_THICKNESS-1}, WHITE, 0, GROUND_THICKNESS);
+  draw_line(&floor, (Point){0, GROUND_Y+GROUND_THICKNESS-1}, (Point){state->fb->width, GROUND_Y+GROUND_THICKNESS-1}, WHITE, 0, GROUND_THICKNESS);
   items[0] = (DrawItem){.shape = &floor, .origin = (Point){0, 0}};
 
   // render bear
-  draw_bitmap(&bear, &BEAR_STANDING, (Point){BEAR_X, GROUND + GROUND_THICKNESS}, WHITE, 1);
+  draw_bitmap(&bear, &BEAR_STANDING, (Point){BEAR_X, GROUND_Y - GROUND_THICKNESS - BEAR_STANDING_HEIGHT}, WHITE, 1);
   items[1] = (DrawItem){.shape = &bear, .origin = (Point){0, 0}};  
 
   // render score
   char score_string[19] = "Score: ";
   uint_to_string(state->score, score_string+7, 11);
-  Pixel score_pixels[FONT_HEIGHT * FONT_WIDTH * 19];
+  static Pixel score_pixels[FONT_HEIGHT * FONT_WIDTH * 19];
   PixelList score = {.pixels = score_pixels, .count = 0, .capacity = sizeof(score_pixels) / sizeof(score_pixels[0])};
-  draw_text(&score, score_string, (Point){BEAR_X-(BEAR_WIDTH/2.0), GROUND+30}, WHITE, 1);
+  draw_text(&score, score_string, (Point){BEAR_X-(BEAR_WIDTH/2.0), GROUND_Y+30}, WHITE, 1);
   items[2] = (DrawItem){.shape = &score, .origin = (Point){0, 0}};  
 
   // render phase specific text
+  static Pixel message_text_pixels[4096];
+  PixelList message_text = {.pixels = message_text_pixels, .count = 0, .capacity = 4096};
   if (state->phase == Title) {  
-    Pixel start_text_pixels[FONT_WIDTH * FONT_HEIGHT * 24 * 16];
-    PixelList start_text = {.pixels = start_text_pixels, .count = 0, .capacity = 2048};
-    draw_text(&start_text, "Press up arrow to start!", (Point){80, 300}, WHITE, 2);
-    items[3] = (DrawItem){.shape = &start_text, .origin = (Point){0, 0}};
+    draw_text(&message_text, "Press up arrow to start!", (Point){80, 300}, WHITE, 2);
+    items[3] = (DrawItem){.shape = &message_text, .origin = (Point){0, 0}};
   }
 
   // render all obstacles
@@ -247,8 +235,8 @@ void render_game(gamestate_t *state) {
 
     uint32_t left = obs->x-(OBSTACLE_WIDTH/2.0);
     uint32_t right = obs->x+(OBSTACLE_WIDTH/2.0);
-    uint32_t top = GROUND-OBSTACLE_HEIGHT-obstacle_y(obs->type);
-    uint32_t bottom = GROUND-obstacle_y(obs->type);
+    uint32_t top = GROUND_Y-OBSTACLE_HEIGHT-obstacle_y(obs->type);
+    uint32_t bottom = GROUND_Y-obstacle_y(obs->type);
 
     Point corners[4] = {(Point){left, bottom}, (Point){right, bottom}, (Point){right, top}, (Point){left, top}};
     fill_quad(&floor, corners, WHITE, 0); // TODO: Create new pixellist
